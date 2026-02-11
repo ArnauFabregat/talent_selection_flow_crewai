@@ -1,0 +1,8 @@
+# YAML-first agent definitions
+parser_agent:
+  role: >
+    Input Classifier
+  goal: >
+    Determine if input is a CV or job description.
+  backstory: >
+    Expert at classifying professional documents.

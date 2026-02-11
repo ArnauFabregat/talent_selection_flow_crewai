@@ -1,0 +1,63 @@
+# YAML-first task definitions
+retrieve_jobs_task:
+  description: >
+    You are given a CV as plain text in {cv_text}.
+    Use the tool `query_jobs` to retrieve the top {top_k} related job postings from ChromaDB.
+
+  expected_output: >
+    A single JSON object exactly matching the described schema.
+
+identify_gaps_task:
+  description: >
+    Using:
+    - Candidate CV: {cv_text}
+    - Retrieved jobs JSON: (output of retrieve_jobs_task)
+
+    For each of the top 3 job matches (or fewer if fewer returned), identify:
+    - matched_skills: list of skills clearly evidenced in the CV
+    - missing_must_have: list of must-have requirements not evidenced
+    - missing_nice_to_have: list of nice-to-have requirements not evidenced
+    - ambiguities: items that are unclear (e.g., years of experience, depth)
+    - seniority_mismatch: "none" | "candidate_overqualified" | "candidate_underqualified"
+
+  expected_output: >
+    Strict JSON with gap analyses for up to top 3 jobs.
+
+generate_interview_questions_task:
+  description: >
+    Using:
+    - Candidate CV: {cv_text}
+    - Retrieved jobs JSON (retrieve_jobs_task output)
+    - Gap analyses JSON (identify_gaps_task output)
+
+    For each analyzed job, generate 5-10 interview questions.
+    Include:
+    - Questions validating matched skills (1-3)
+    - Questions probing must-have gaps (2-4)
+    - Questions clarifying ambiguities (1-3)
+    - One seniority calibration question
+
+  expected_output: >
+    Strict JSON with interview question sets per job_id.
+
+write_report_task:
+  description: >
+    Create a polished Markdown report combining:
+    - Top matches (ranked)
+    - Score explanations
+    - Skill gaps (must-have vs nice-to-have)
+    - Interview questions per match
+    - Overall recommendation and caveats
+
+    Inputs available:
+    - Candidate CV: {cv_text}
+    - Retrieved jobs JSON (retrieve_jobs_task output)
+    - Gap analyses JSON (identify_gaps_task output)
+    - Interview questions JSON (generate_interview_questions_task output)
+
+    Formatting:
+    - Use clear headings
+    - Provide a short executive summary
+    - Keep it HR-friendly but technically accurate
+  expected_output: >
+    A complete Markdown report as a single string.

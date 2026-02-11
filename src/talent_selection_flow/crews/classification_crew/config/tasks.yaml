@@ -1,0 +1,7 @@
+# YAML-first task definitions
+parse_task:
+  description: >
+    Analyze this input and classify it:\n{user_input}
+
+  expected_output: >
+    Classification with extracted content
