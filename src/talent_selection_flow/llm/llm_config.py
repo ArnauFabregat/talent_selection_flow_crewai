@@ -1,8 +1,12 @@
+import os
+from dotenv import load_dotenv
 from crewai import LLM
 
+# Load environment variables from .env file
+load_dotenv()
+
 groq_llm = LLM(
-    model="groq/llama-3.3-70b-versatile",
-    base_url="https://api.groq.com/openai/v1",
-    api_key="YOUR_GROQ_API_KEY",  # https://console.groq.com
-    temperature=0.7  # optional
+    model=os.getenv("LLM_MODEL"),
+    api_key=os.getenv("LLM_API_KEY"),
+    temperature=0.7,  # optional
 )
