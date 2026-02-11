@@ -1,8 +1,14 @@
 # query_jobs(), init client, etc.
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
 import chromadb
 from chromadb.utils.embedding_functions import JinaEmbeddingFunction
 from typing import Any
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 def get_client(persist_dir: str) -> Any:
@@ -23,8 +29,8 @@ def get_collection(client: Any, collection_name: str, if_embedding: bool) -> Any
     """
     if if_embedding:
         embedding_fn = JinaEmbeddingFunction(
-            api_key="YOUR_JINA_API_KEY",  # https://api.jina.ai
-            model_name="jina-embeddings-v2-base-en",
+            api_key=os.getenv("EMBEDDING_API_KEY"),  # https://jina.ai/
+            model_name=os.getenv("EMBEDDING_MODEL"),
         )
 
     else:
