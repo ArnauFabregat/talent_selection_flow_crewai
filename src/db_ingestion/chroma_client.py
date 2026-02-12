@@ -60,3 +60,4 @@ def add_to_collection(
             documents=[row["content"]],
             metadatas=[metadata.json_dict]
         )
+        # TODO Add timer to slow api posts
