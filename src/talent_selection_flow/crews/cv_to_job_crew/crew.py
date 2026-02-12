@@ -8,7 +8,7 @@ from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 
 from config.paths import REPORT_OUTPUT_PATH
-from llm.llm_config import groq_llm
+from llm.llm_config import gemini_llm
 from talent_selection_flow.tools.chromadb_matcher import ChromaDBMatcherTool
 from talent_selection_flow.crews.cv_to_job_crew.schemas.match import RetrievalResult
 from talent_selection_flow.crews.cv_to_job_crew.schemas.report import GapAnalysisOutput, InterviewQuestionsOutput
@@ -40,7 +40,7 @@ class CVToJobCrew:
         return Agent(
             config=self.agents_config["cv_job_retrieval_agent"],
             tools=[ChromaDBMatcherTool(chroma_path=os.getenv("CHROMA_DB_PATH"))],
-            llm=groq_llm,
+            llm=gemini_llm,
             verbose=True,
         )
 
@@ -49,7 +49,7 @@ class CVToJobCrew:
         # TODO: tool to load job descriptions for the identified job_ids
         return Agent(
             config=self.agents_config["gap_identifier_agent"],
-            llm=groq_llm,
+            llm=gemini_llm,
             verbose=True,
         )
 
@@ -57,7 +57,7 @@ class CVToJobCrew:
     def interview_question_generator_agent(self) -> Agent:
         return Agent(
             config=self.agents_config["interview_question_generator_agent"],
-            llm=groq_llm,
+            llm=gemini_llm,
             verbose=True,
         )
 
@@ -65,7 +65,7 @@ class CVToJobCrew:
     def report_writer_agent(self) -> Agent:
         return Agent(
             config=self.agents_config["report_writer_agent"],
-            llm=groq_llm,
+            llm=gemini_llm,
             verbose=True,
         )
 

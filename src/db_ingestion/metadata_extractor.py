@@ -2,7 +2,7 @@
 from crewai import Agent, Crew, Task
 
 from src.config.params import VERBOSE
-from src.llm.llm_config import groq_llm
+from src.llm.llm_config import gemini_llm
 from src.db_ingestion.schemas import CVMetadata, JobMetadata
 
 
@@ -15,7 +15,7 @@ class CVMetadataExtractorCrew:
             role="CV Metadata Extractor",
             goal="Extract structured metadata from CV text",
             backstory="You are an expert HR analyst who extracts structured info from unstructured CVs",
-            llm=groq_llm,
+            llm=gemini_llm,
             verbose=VERBOSE,
         )
 
@@ -50,7 +50,7 @@ class JobMetadataExtractorCrew:
             role="Job Metadata Extractor",
             goal="Extract structured metadata from job description text",
             backstory="You are an expert HR analyst who extracts structured info from unstructured job descriptions",
-            llm=groq_llm,
+            llm=gemini_llm,
             verbose=VERBOSE,
         )
 
