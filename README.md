@@ -168,7 +168,6 @@ TBD
 
 ## TODO
 - Add documentation in README
-- Add logger
 - Add guardrails (to check siso code?)
 - Add docstrings
 - Add git config for PR

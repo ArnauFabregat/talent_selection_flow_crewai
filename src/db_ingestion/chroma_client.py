@@ -2,9 +2,11 @@
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+import time
 from tqdm import tqdm
 import pandas as pd
 
+from src.logger import logger
 import chromadb
 from chromadb.utils.embedding_functions import JinaEmbeddingFunction
 from typing import Any
@@ -50,6 +52,7 @@ def add_to_collection(
     """
     Add documents with metadata to the specified ChromaDB collection.
     """
+    logger.info(f"Creating collection with {len(corpus)} documents...")
     for _, row in tqdm(corpus.iterrows(), total=len(corpus)):
 
         inputs = {"content": row["content"]}
@@ -60,4 +63,5 @@ def add_to_collection(
             documents=[row["content"]],
             metadatas=[metadata.json_dict]
         )
-        # TODO Add timer to slow api posts
+        # Sleep to avoid hitting rate limits
+        time.sleep(2)
