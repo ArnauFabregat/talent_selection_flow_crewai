@@ -48,6 +48,7 @@ def add_to_collection(
         metadata_extractor: Any,
         corpus: pd.DataFrame,
         collection: Any,
+        sleep_seconds: int = 0,
 ) -> None:
     """
     Add documents with metadata to the specified ChromaDB collection.
@@ -64,4 +65,4 @@ def add_to_collection(
             metadatas=[metadata.json_dict]
         )
         # Sleep to avoid hitting rate limits
-        time.sleep(2)
+        time.sleep(sleep_seconds)

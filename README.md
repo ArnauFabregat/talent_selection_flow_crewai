@@ -168,6 +168,7 @@ TBD
 
 ## TODO
 - Add documentation in README
+- Add gemini flash free llm, maybe have more TPM
 - Add guardrails (to check siso code?)
 - Add docstrings
 - Add git config for PR

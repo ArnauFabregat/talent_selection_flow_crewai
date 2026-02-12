@@ -28,7 +28,7 @@ class CVMetadataExtractorCrew:
                             - country: candidate's location in ISO code
                             - summary: 2-3 sentence overview of the candidate
                             - education_level: one of highschool/bachelor/master/phd/other
-                            - languages: comma-separated languages spoken
+                            - languages: comma-separated languages spoken or "unknown"
                             """,
             agent=metadata_extractor_agent,
             output_json=CVMetadata,
