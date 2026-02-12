@@ -19,7 +19,6 @@ litellm-logging = [
   "fastapi-sso>=0.20.0",
   "pydantic[email]>=2.11.10",
 ]
-
 # Tooling — not required to run your app
 dev = [
   "pre-commit>=3.7",

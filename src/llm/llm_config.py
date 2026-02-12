@@ -20,10 +20,4 @@ gemini_llm = LLM(
     top_p=0.9,
     top_k=40,  # Top-k sampling parameter
     max_output_tokens=2048,
-    stop_sequences=["END", "STOP"],
-    stream=True,  # Enable streaming
-    safety_settings={
-        "HARM_CATEGORY_HARASSMENT": "BLOCK_NONE",
-        "HARM_CATEGORY_HATE_SPEECH": "BLOCK_NONE"
-    }
 )
