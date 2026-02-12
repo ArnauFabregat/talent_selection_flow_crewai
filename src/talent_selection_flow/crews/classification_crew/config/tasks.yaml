@@ -4,4 +4,4 @@ parse_task:
     Analyze this input and classify it:\n{user_input}
 
   expected_output: >
-    Classification with extracted content
+    Single string label that best describes the input. Choose from: "job", "cv", "unknown".

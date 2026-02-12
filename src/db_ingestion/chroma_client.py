@@ -2,6 +2,8 @@
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+from tqdm import tqdm
+import pandas as pd
 
 import chromadb
 from chromadb.utils.embedding_functions import JinaEmbeddingFunction
@@ -46,16 +48,19 @@ def get_collection(client: Any, collection_name: str, if_embedding: bool) -> Any
 
 def add_to_collection(
         metadata_extractor: Any,
-        inputs: dict[str, str],
-        document: str,
+        corpus: pd.DataFrame,
         collection: Any,
 ) -> None:
     """
     Add documents with metadata to the specified ChromaDB collection.
     """
-    cv_metadata = metadata_extractor.crew().kickoff(inputs=inputs)  # TODO check this input format
-    collection.add(
-        ids=[cv_metadata.pydantic.cv_id],
-        documents=[document],
-        metadatas=[cv_metadata.pydantic.model_dump()]
-    )
+    for _, row in tqdm(corpus.iterrows(), total=len(corpus)):
+
+        inputs = {"content": row["content"]}
+        metadata = metadata_extractor.crew().kickoff(inputs=inputs)
+
+        collection.add(
+            ids=[row["doc_id"]],
+            documents=[row["content"]],
+            metadatas=[metadata.json]
+        )

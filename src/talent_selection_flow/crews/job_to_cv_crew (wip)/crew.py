@@ -10,14 +10,14 @@ from crewai.project import CrewBase, agent, crew, task
 from config.paths import REPORT_OUTPUT_PATH
 from llm.llm_config import groq_llm
 from talent_selection_flow.tools.chromadb_matcher import ChromaDBMatcherTool
-from talent_selection_flow.crews.cv_to_job_crew.schemas.match import RetrievalResult
-from talent_selection_flow.crews.cv_to_job_crew.schemas.report import GapAnalysisOutput, InterviewQuestionsOutput
+from talent_selection_flow.crews.job_to_cv_crew.schemas.match import RetrievalResult
+from talent_selection_flow.crews.job_to_cv_crew.schemas.report import FinalReportModel, GapAnalysis, QuestionSet
 
 
 @CrewBase
-class CVToJobCrew:
+class JobToCVCrew:
     """
-    CV → Related Jobs → Gaps → Interview Questions → Final Report
+    Job Description → CV Matching → Gaps → Interview Questions → Final Report
     YAML-first configuration:
       - config/agents.yaml
       - config/tasks.yaml
@@ -39,14 +39,13 @@ class CVToJobCrew:
     def cv_job_retrieval_agent(self) -> Agent:
         return Agent(
             config=self.agents_config["cv_job_retrieval_agent"],
-            tools=[ChromaDBMatcherTool(chroma_path=os.getenv("CHROMA_DB_PATH"))],
+            tools=[ChromaDBMatcherTool()],
             llm=groq_llm,
             verbose=True,
         )
 
     @agent
     def gap_identifier_agent(self) -> Agent:
-        # TODO: tool to load job descriptions for the identified job_ids
         return Agent(
             config=self.agents_config["gap_identifier_agent"],
             llm=groq_llm,
@@ -90,7 +89,7 @@ class CVToJobCrew:
             expected_output=task_config["expected_output"],
             agent=self.gap_identifier_agent(),
             context=[self.retrieve_jobs_task()],
-            output_json=GapAnalysisOutput,
+            output_json=GapAnalysis,
         )
 
     @task
@@ -101,7 +100,7 @@ class CVToJobCrew:
             expected_output=task_config["expected_output"],
             agent=self.interview_question_generator_agent(),
             context=[self.retrieve_jobs_task(), self.identify_gaps_task()],
-            output_json=InterviewQuestionsOutput,
+            output_json=QuestionSet,
         )
 
     @task
@@ -116,6 +115,7 @@ class CVToJobCrew:
                 self.identify_gaps_task(),
                 self.generate_interview_questions_task(),
             ],
+            output_pydantic=FinalReportModel,
             markdown=True,
             output_file=REPORT_OUTPUT_PATH,
         )

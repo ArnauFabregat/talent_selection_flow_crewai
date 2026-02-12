@@ -38,13 +38,13 @@ class TalentSelectionFlow(Flow[TalentState]):
     @listen("cv")
     def handle_cv(self) -> Any:
         return CVToJobCrew().crew().kickoff(
-            inputs={"cv_text": self.state.raw_input}
+            inputs={"content": self.state.raw_input}
         )
 
     @listen("job")
     def handle_job(self) -> Any:
         return JobToCVCrew().crew().kickoff(
-            inputs={"job_description": self.state.raw_input}
+            inputs={"content": self.state.raw_input}
         )
 
     @listen("unknown")

@@ -1,37 +1,47 @@
-# optional: report schema/output formatting
-from typing import List, Literal
 from pydantic import BaseModel, Field
+from typing import List, Dict
 
 
-class GapAnalysis(BaseModel):
-    job_id: str
-    overall_fit_score: int = Field(..., ge=0, le=100)
-    matched_skills: List[str] = Field(default_factory=list)
-    missing_must_have: List[str] = Field(default_factory=list)
-    missing_nice_to_have: List[str] = Field(default_factory=list)
-    ambiguities: List[str] = Field(default_factory=list)
-    seniority_mismatch: Literal["none", "candidate_overqualified", "candidate_underqualified"] = "none"
-    notes: str = ""
+class JobGapAnalysis(BaseModel):
+    overall_fit_score: float = Field(
+        description="Similarity score from ChromaDB for this job."
+    )
+    matched_skills: List[str] = Field(
+        description="Skills evidenced in the CV that match the job requirements."
+    )
+    missing_must_have: List[str] = Field(
+        description="Must-have requirements not evidenced in the CV."
+    )
+    missing_nice_to_have: List[str] = Field(
+        description="Nice-to-have requirements not evidenced in the CV."
+    )
 
 
-class InterviewQuestion(BaseModel):
-    type: Literal["matched", "gap", "ambiguity", "seniority"]
-    question: str
-    right_answer: str = ""
+class GapAnalysisOutput(BaseModel):
+    jobs: Dict[str, JobGapAnalysis] = Field(
+        description="Mapping of job_id to its gap analysis result."
+    )
 
 
-class QuestionSet(BaseModel):
-    job_id: str
-    questions: List[InterviewQuestion] = Field(default_factory=list)
+class QuestionItem(BaseModel):
+    question: str = Field(description="The interview question text.")
+    response: str = Field(description="The correct response to the question.")
 
 
-class FinalReportModel(BaseModel):
-    """
-    Optional structured report representation.
-    In this first iteration, we write Markdown, but you can use this later to generate PDF, etc.
-    """
-    executive_summary: str
-    top_matches: List[str] = Field(default_factory=list)
-    analyses: List[GapAnalysis] = Field(default_factory=list)
-    question_sets: List[QuestionSet] = Field(default_factory=list)
-    recommendation: str = ""
+class JobQuestions(BaseModel):
+    matched_skill_questions: List[QuestionItem] = Field(
+        description="Questions validating matched skills."
+    )
+    gap_probing_questions: List[QuestionItem] = Field(
+        description="Questions exploring must-have gaps."
+    )
+    ambiguity_clarification_questions: List[QuestionItem] = Field(
+        description="Questions clarifying unclear information."
+    )
+    seniority_question: QuestionItem = Field(
+        description="A single question assessing seniority alignment."
+    )
+
+
+class InterviewQuestionsOutput(BaseModel):
+    jobs: Dict[str, JobQuestions] = Field(description="Mapping of job_id to its interview question set.")

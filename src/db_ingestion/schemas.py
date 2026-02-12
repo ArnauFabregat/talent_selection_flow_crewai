@@ -14,7 +14,6 @@ class BaseProfile(BaseModel):
         skills (str): Comma-separated list of skills.
         industries (str): Comma-separated list of relevant industries.
         experience_level (Literal): Normalized seniority level.
-        years_experience (str): Numeric years if extractable, else empty.
         country (str, optional): Candidate's country or job location.
         summary (str): Short document summary.
     """
@@ -22,7 +21,6 @@ class BaseProfile(BaseModel):
     skills: Optional[str] = None
     industries: Optional[str] = None
     experience_level: Literal["intern", "entry", "intermediate", "senior"]
-    years_experience: Optional[str] = None
     country: Optional[str] = None
     summary: str
 

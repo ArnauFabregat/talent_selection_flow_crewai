@@ -3,10 +3,11 @@
 An open-source multiagent system for talent selection using advanced AI techniques. This system leverages multiple specialized agents to analyze candidate profiles and job requirements, providing intelligent matching and insights.
 
 Tech Stack:
-- **ChromaDB** - Vector database for semantic search and embeddings
+- [**ChromaDB**](https://docs.trychroma.com/docs/overview/getting-started) - Vector database for semantic search and embeddings
 - [**CrewAI**](https://docs.crewai.com/en/quickstart) - Multi-agent orchestration framework
-- *LLM* - LLM to be defined
-- **Chainlit** - LLM application UI framework
+- [**Groq**](https://console.groq.com) - LLM provider using `llama-3.3-70b-versatile` (free tier)
+- [**Jina**](https://jina.ai/) - Embedding model `jina-embeddings-v2-base-en` for semantic embeddings (free tier)
+- [**Chainlit**](https://docs.chainlit.io/get-started/overview) - LLM application UI framework
 
 ## Table of Contents
 
@@ -167,6 +168,8 @@ TBD
 
 ## TODO
 - Add documentation in README
+- Add guardrails (to check siso code?)
+- Add docstrings
 - Add git config for PR
 - Add unit tests
 - Add agent that validates info in linkedin ¿? (https://github.com/crewAIInc/crewAI-examples/blob/main/crews/recruitment/src/recruitment/tools/linkedin.py)

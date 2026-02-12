@@ -6,10 +6,19 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "crewai>=1.9.3",
+    "litellm>=1.75.3",
     "pandas>=3.0.0",
 ]
 
 [dependency-groups]
+# To solve litellm_logging dependency issues
+litellm-logging = [
+  "apscheduler>=3.11.2",
+  "fastapi>=0.128.8",
+  "fastapi-sso>=0.20.0",
+  "pydantic[email]>=2.11.10",
+]
+
 # Tooling — not required to run your app
 dev = [
   "pre-commit>=3.7",

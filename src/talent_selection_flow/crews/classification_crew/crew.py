@@ -3,7 +3,7 @@
 from crewai import Agent, Crew, Task
 from crewai.project import CrewBase, agent, crew, task
 
-from talent_selection_flow.llm.llm_config import groq_llm
+from llm.llm_config import groq_llm
 from talent_selection_flow.crews.classification_crew.schemas.input import ParsedInput
 
 

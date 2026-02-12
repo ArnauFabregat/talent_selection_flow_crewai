@@ -13,3 +13,5 @@ CVS_PATH_RAW = RAW_DIR / "cvs_dataset.csv"
 
 JOBS_PATH_PROCESSED = PROCESSED_DIR / "jobs_processed.csv"
 CVS_PATH_PROCESSED = PROCESSED_DIR / "cvs_processed.csv"
+
+REPORT_OUTPUT_PATH = DATA_DIR / "reports" / "latest_report.md"

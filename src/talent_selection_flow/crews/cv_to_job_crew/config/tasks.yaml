@@ -1,34 +1,68 @@
 # YAML-first task definitions
 retrieve_jobs_task:
   description: >
-    You are given a CV as plain text in {cv_text}.
-    Use the tool `query_jobs` to retrieve the top {top_k} related job postings from ChromaDB.
+    You are given a CV as plain text in {content}.
+    Use the tool `query_jobs` to retrieve at most the top 5 most relevant job
+    postings from ChromaDB, based on semantic similarity.
+
+    For each retrieved job, extract:
+      - job_id
+      - similarity score
+
+    Return them in strictly structured JSON format.
 
   expected_output: >
-    A single JSON object exactly matching the described schema.
+    Strict JSON exactly matching the described schema:
+    {
+      "top_k": 0,
+      "results": [
+        {
+          "job_id": "JOB_ID",
+          "similarity": 0.0
+        }
+      ]
+    }
+
+    Additional rules:
+    - Only return the JSON — no commentary before or after.
+    - The number of returned items must match top_k.
 
 identify_gaps_task:
   description: >
-    Using:
-    - Candidate CV: {cv_text}
-    - Retrieved jobs JSON: (output of retrieve_jobs_task)
+    Using the following inputs:
+    - Candidate CV: {content}
+    - Context
 
-    For each of the top 3 job matches (or fewer if fewer returned), identify:
-    - matched_skills: list of skills clearly evidenced in the CV
-    - missing_must_have: list of must-have requirements not evidenced
-    - missing_nice_to_have: list of nice-to-have requirements not evidenced
-    - ambiguities: items that are unclear (e.g., years of experience, depth)
-    - seniority_mismatch: "none" | "candidate_overqualified" | "candidate_underqualified"
+    Analyze the top 5 matched jobs (or fewer if fewer were retrieved).
+
+    For each job_id, identify:
+      - overall_fit_score: the ChromaDB similarity score for that job
+      - matched_skills: skills that appear both in the job requirements and are clearly evidenced in the candidate CV
+      - missing_must_have: required "must-have" skills/experiences not evidenced in the candidate CV
+      - missing_nice_to_have: nice-to-have skills/experiences not evidenced in the candidate CV
+
+    The output must organize results per job_id and follow a strict JSON structure.
 
   expected_output: >
-    Strict JSON with gap analyses for up to top 3 jobs.
+    Return a strict JSON object with the following structure:
+    {
+      "jobs": {
+        "JOB_ID": {
+          "overall_fit_score": 0.0,
+          "matched_skills": ["skill1", "skill2"],
+          "missing_must_have": ["req1", "req2"],
+          "missing_nice_to_have": ["req3", "req4"]
+        }
+      }
+    }
+    Additional rules:
+    - Only return the JSON — no commentary before or after.
 
 generate_interview_questions_task:
   description: >
     Using:
-    - Candidate CV: {cv_text}
-    - Retrieved jobs JSON (retrieve_jobs_task output)
-    - Gap analyses JSON (identify_gaps_task output)
+    - Candidate CV: {content}
+    - Context
 
     For each analyzed job, generate 5-10 interview questions.
     Include:
@@ -38,7 +72,29 @@ generate_interview_questions_task:
     - One seniority calibration question
 
   expected_output: >
-    Strict JSON with interview question sets per job_id.
+    Return a strict JSON object with the following structure:
+    {
+      "jobs": {
+        "JOB_ID": {
+          "matched_skill_questions": [
+            {"question": "...", "response": "..."}
+          ],
+          "gap_probing_questions": [
+            {"question": "...", "response": "..."}
+          ],
+          "ambiguity_clarification_questions": [
+            {"question": "...", "response": "..."}
+          ],
+          "seniority_question": {
+            "question": "...",
+            "response": "..."
+          }
+        }
+      }
+    }
+    Additional rules:
+    - Every question must have a short correct response.
+    - Only return the JSON — no commentary before or after.
 
 write_report_task:
   description: >
@@ -50,7 +106,7 @@ write_report_task:
     - Overall recommendation and caveats
 
     Inputs available:
-    - Candidate CV: {cv_text}
+    - Candidate CV: {content}
     - Retrieved jobs JSON (retrieve_jobs_task output)
     - Gap analyses JSON (identify_gaps_task output)
     - Interview questions JSON (generate_interview_questions_task output)
