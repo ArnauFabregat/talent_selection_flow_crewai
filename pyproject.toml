@@ -5,7 +5,7 @@ description = "Open source project to build a talent-selection multi-agent syste
 readme = "README.md"
 requires-python = "==3.13.12"
 dependencies = [
-    "crewai>=1.9.3",
+    "crewai[google-genai]>=1.9.3",
     "litellm>=1.75.3",
     "loguru>=0.7.3",
     "pandas>=3.0.0",
