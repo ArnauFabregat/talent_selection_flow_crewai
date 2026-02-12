@@ -21,7 +21,7 @@ def get_client(persist_dir: str) -> Any:
     return chromadb.PersistentClient(path=persist_dir)
 
 
-def get_collection(client: Any, collection_name: str, if_embedding: bool) -> Any:
+def get_collection(client: Any, collection_name: str) -> Any:
     """
     Get or create a jobs collection in the given ChromaDB client.
 
@@ -29,14 +29,10 @@ def get_collection(client: Any, collection_name: str, if_embedding: bool) -> Any
                      as distance metric.
     - "cosine" → instructs HNSW to use cosine distance.
     """
-    if if_embedding:
-        embedding_fn = JinaEmbeddingFunction(
-            api_key=os.getenv("EMBEDDING_API_KEY"),  # https://jina.ai/
-            model_name=os.getenv("EMBEDDING_MODEL"),
-        )
-
-    else:
-        embedding_fn = None
+    embedding_fn = JinaEmbeddingFunction(
+        api_key=os.getenv("EMBEDDING_API_KEY"),  # https://jina.ai/
+        model_name=os.getenv("EMBEDDING_MODEL"),
+    )
 
     collection = client.get_or_create_collection(
         name=collection_name,
@@ -60,7 +56,7 @@ def add_to_collection(
         metadata = metadata_extractor.crew().kickoff(inputs=inputs)
 
         collection.add(
-            ids=[row["doc_id"]],
+            ids=[str(row["doc_id"])],
             documents=[row["content"]],
-            metadatas=[metadata.json]
+            metadatas=[metadata.json_dict]
         )
