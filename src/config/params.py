@@ -1,1 +1,2 @@
 VERBOSE = False
+DEBUG_LOGS = False
