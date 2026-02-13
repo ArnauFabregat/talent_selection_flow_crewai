@@ -168,10 +168,7 @@ TBD
 
 ## TODO
 - Add documentation in README
-- Add guardrail for country literals to be ISO, languages can be standarized?¿
-- Add notebook for data ingestion analysis: count unknown or other for literal fields, etc
 - Add VERBOSE param at class levels default False
-- Add values list in config/params for literal in metadata schemas
 - Add docstrings
 - Add unit tests
 - Add agent that validates info in linkedin ¿? (https://github.com/crewAIInc/crewAI-examples/blob/main/crews/recruitment/src/recruitment/tools/linkedin.py)

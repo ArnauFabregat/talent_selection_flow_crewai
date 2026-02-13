@@ -9,6 +9,7 @@ dependencies = [
     "litellm>=1.75.3",
     "loguru>=0.7.3",
     "pandas>=3.0.0",
+    "pycountry>=24.6.1",
 ]
 
 [dependency-groups]
@@ -24,6 +25,7 @@ dev = [
   "pre-commit>=3.7",
   "ruff>=0.5",
   "mypy>=1.8",
+  "ipykernel>=7.2.0",
 ]
 # Only for testing workflows
 test = [

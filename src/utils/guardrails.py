@@ -1,7 +1,9 @@
 import json
 from typing import Any, Tuple, List
 from crewai import TaskOutput
+from pycountry import countries
 
+from src.db_ingestion.enums import ExperienceLevel, EducationLevel, EmploymentType
 from src.utils.logger import logger
 
 
@@ -18,19 +20,20 @@ def validate_cvmetadata_schema(result: TaskOutput) -> Tuple[bool, Any]:
     """
     Should go after validate_json_format guardrail
     """
-    education_levels = ["highschool", "bachelor", "master", "phd", "other", "unknown"]
-    experience_levels = ["intern", "entry", "intermediate", "senior", "other", "unknown"]
-
     data = json.loads(result.raw)
     fields: List[str] = []
     errors: List[str] = []
 
-    if data.get("education_level") not in education_levels:
+    if data.get("education_level") not in EducationLevel._value2member_map_:
         fields.append("education_level")
-        errors.append("education_level must be one of highschool/bachelor/master/phd/other/unknown")
-    if data.get("experience_level") not in experience_levels:
+        errors.append(f"education_level must be one of {"/".join(EducationLevel)}")
+    if data.get("experience_level") not in ExperienceLevel._value2member_map_:
         fields.append("experience_level")
-        errors.append("experience_level must be one of intern/entry/intermediate/senior/other/unknown")
+        errors.append(f"experience_level must be one of {"/".join(ExperienceLevel)}")
+    if data.get("country"):
+        if countries.get(alpha_2=data.get("country")) is None:
+            fields.append("country")
+            errors.append("country must be in ISO Alpha-2 code")
     if errors:
         logger.warning(f"Guardrail `validate_cvmetadata_schema` triggered for fields: {', '.join(fields)}")
         return (False, f"Fix these:\n{'; '.join(errors)}")
@@ -41,19 +44,20 @@ def validate_jobmetadata_schema(result: TaskOutput) -> Tuple[bool, Any]:
     """
     Should go after validate_json_format guardrail
     """
-    emplyment_types = ["full-time", "part-time", "contract", "freelance", "other", "unknown"]
-    experience_levels = ["intern", "entry", "intermediate", "senior", "other", "unknown"]
-
     data = json.loads(result.raw)
     fields: List[str] = []
     errors: List[str] = []
 
-    if data.get("employment_type") not in emplyment_types:
+    if data.get("employment_type") not in EmploymentType._value2member_map_:
         fields.append("employment_type")
-        errors.append("employment_type must be one of full-time/part-time/contract/freelance/other/unknown")
-    if data.get("experience_level") not in experience_levels:
+        errors.append(f"employment_type must be one of {"/".join(EmploymentType)}")
+    if data.get("experience_level") not in ExperienceLevel._value2member_map_:
         fields.append("experience_level")
-        errors.append("experience_level must be one of intern/entry/intermediate/senior/other/unknown")
+        errors.append(f"experience_level must be one of {"/".join(ExperienceLevel)}")
+    if data.get("country"):
+        if countries.get(alpha_2=data.get("country")) is None:
+            fields.append("country")
+            errors.append("country must be in ISO Alpha-2 code")
     if errors:
         logger.warning(f"Guardrail `validate_jobmetadata_schema` triggered for fields: {', '.join(fields)}")
         return (False, f"Fix these:\n{'; '.join(errors)}")
