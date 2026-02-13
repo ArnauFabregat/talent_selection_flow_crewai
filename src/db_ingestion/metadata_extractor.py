@@ -20,15 +20,28 @@ class CVMetadataExtractorCrew:
         )
 
         extract_metadata_task = Task(
-            description="Extract metadata for this CV:\n{content}",
-            expected_output="""Extract CV metadata with:
-                            - skills: comma-separated list of technical and soft skills
+            description="""Extract metadata for this CV:\n{content}
+                        \nExtract this metadata:
+                            - skills: comma-separated list of required skills
                             - industries: comma-separated relevant industries
                             - experience_level: one of intern/entry/intermediate/senior
-                            - country: candidate's location in ISO code
-                            - summary: 2-3 sentence overview of the candidate
+                            - country: candidate's location country in ISO code
+                            - summary: 2-3 sentence overview of the role
                             - education_level: one of highschool/bachelor/master/phd/other
                             - languages: comma-separated languages spoken or "unknown"
+                        """,
+            expected_output="""Return a strict JSON object with the following structure:
+                            {
+                            "skills": "skill1, skill2, ...",
+                            "industries": "industry1, industry2, ...",
+                            "experience_level": "...",
+                            "country": "...",
+                            "summary": "...",
+                            "education_level": "...",
+                            "languages": "language1, language2, ...",
+                            }
+                            Additional rules:
+                            - Only return the JSON — no commentary before or after.
                             """,
             agent=metadata_extractor_agent,
             output_json=CVMetadata,
@@ -55,11 +68,10 @@ class JobMetadataExtractorCrew:
         )
 
         extract_metadata_task = Task(
-            description="Extract metadata for this job description:\n{content}",
-            expected_output="""Extract job posting metadata with:
+            description="""Extract metadata for this job description:\n{content}
+                        \nExtract this metadata:
                             - title: exact job title as stated
-                            - required_skills: comma-separated list of required skills
-                            - skills: comma-separated list of all mentioned skills (required + preferred)
+                            - skills: comma-separated list of required skills
                             - industries: comma-separated relevant industries
                             - experience_level: one of intern/entry/intermediate/senior
                             - country: job location country in ISO code
@@ -67,6 +79,21 @@ class JobMetadataExtractorCrew:
                             - summary: 2-3 sentence overview of the role
                             - employment_type: full-time/part-time/contract/freelance if mentioned
                             - responsibilities: comma-separated key job responsibilities
+                        """,
+            expected_output="""Return a strict JSON object with the following structure:
+                            {
+                            "title": "...",
+                            "skills": "skill1, skill2, ...",
+                            "industries": "industry1, industry2, ...",
+                            "experience_level": "...",
+                            "country": "...",
+                            "city": "...",
+                            "summary": "...",
+                            "employment_type": "...",
+                            "responsibilities": "resp1, resp2",
+                            }
+                            Additional rules:
+                            - Only return the JSON — no commentary before or after.
                             """,
             agent=metadata_extractor_agent,
             output_json=JobMetadata,

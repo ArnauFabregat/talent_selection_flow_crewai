@@ -45,13 +45,11 @@ class JobMetadata(BaseProfile):
     Fields:
         title (str): Job title.
         city (str, optional): Job location.
-        required_skills (str): Comma-separated required skills.
         employment_type (str, optional): Full-time, part-time, contract, etc.
         responsibilities (str, optional): Comma-separated job responsibilities.
     """
 
     title: str
-    required_skills: str
     city: Optional[str] = None
     employment_type: Optional[str] = None
     responsibilities: Optional[str] = None

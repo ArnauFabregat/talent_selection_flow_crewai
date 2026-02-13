@@ -6,7 +6,7 @@ import time
 from tqdm import tqdm
 import pandas as pd
 
-from src.logger import logger
+from src.utils.logger import logger
 import chromadb
 from chromadb.utils.embedding_functions import JinaEmbeddingFunction
 from typing import Any, Optional
