@@ -3,9 +3,9 @@
 An open-source multiagent system for talent selection using advanced AI techniques. This system leverages multiple specialized agents to analyze candidate profiles and job requirements, providing intelligent matching and insights.
 
 Tech Stack:
-- [**ChromaDB**](https://docs.trychroma.com/docs/overview/getting-started) - Vector database for semantic search and embeddings
 - [**CrewAI**](https://docs.crewai.com/en/quickstart) - Multi-agent orchestration framework
-- [**Groq**](https://console.groq.com) - LLM provider using `llama-3.3-70b-versatile` (free tier)
+- [**ChromaDB**](https://docs.trychroma.com/docs/overview/getting-started) - Vector database for semantic search and embeddings
+- [**OpenRouter**](https://openrouter.ai/) - LLM provider using `arcee-ai/trinity-large-preview:free` (free tier)
 - [**Jina**](https://jina.ai/) - Embedding model `jina-embeddings-v2-base-en` for semantic embeddings (free tier)
 - [**Chainlit**](https://docs.chainlit.io/get-started/overview) - LLM application UI framework
 
@@ -168,56 +168,13 @@ TBD
 
 ## TODO
 - Add documentation in README
+- Add notebook for data ingestion analysis: count unknown or other for literal fields, etc
 - Add VERBOSE param at class levels default False
-- Add guardrails (to check siso code?)
+- Add values list in config/params for literal in metadata schemas
 - Add docstrings
-- Add git config for PR
 - Add unit tests
 - Add agent that validates info in linkedin ¿? (https://github.com/crewAIInc/crewAI-examples/blob/main/crews/recruitment/src/recruitment/tools/linkedin.py)
 - Tools:
     - crewai: https://docs.crewai.com/en/concepts/tools
     - langchain: https://docs.langchain.com/oss/python/integrations/tools
 - Crewai examples: https://docs.crewai.com/en/examples/example
-
-Idea to handle problematic docs after max retry:
-```python
-for cv_doc in self.state.cv_queue:
-    try:
-        result = CVCrew().crew().kickoff(
-            inputs={"cv_text": cv_doc["text"]}
-        )
-        # Validate after guardrail retries exhausted
-        parsed = CVMetadata(**result.json_dict)
-        self.state.results.append(parsed.model_dump())
-
-    except (ValidationError, Exception):
-        # Store problematic doc ID
-        self.state.problematic_ids.append(cv_doc["id"])
-        save_to_problematics_table(cv_doc["id"])
-```
-Idea to create guardrail for basemodel:
-```python
-from typing import Any, Tuple
-from pydantic import BaseModel, ValidationError
-
-def validate_cv_output(result) -> Tuple[bool, Any]:
-    try:
-        cv = CVMetadata.model_validate_json(result.raw)
-        # Return the dict, not a JSON string
-        return (True, cv.model_dump())
-    except ValidationError as e:
-        return (
-            False,
-            f"Output doesn't match CVMetadata schema:\n{e}\n"
-            f"Please return valid JSON matching: {CVMetadata.model_json_schema()}"
-        )
-    except Exception:
-        return (
-            False,
-            "Output is not valid JSON. Please return a valid JSON object "
-            f"matching: {CVMetadata.model_json_schema()}"
-        )
-# then in Task params:
-guardrail = validate_cv_output
-guardrail_max_retries = 3  # Agent gets 3 attempts to fix the output
-```

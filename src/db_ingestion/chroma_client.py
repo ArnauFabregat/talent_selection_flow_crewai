@@ -6,7 +6,7 @@ import time
 from tqdm import tqdm
 import pandas as pd
 
-from src.logger import logger
+from src.utils.logger import logger
 import chromadb
 from chromadb.utils.embedding_functions import JinaEmbeddingFunction
 from typing import Any, Optional
@@ -55,10 +55,10 @@ def add_to_collection(
     optionally respecting a max requests-per-minute limit.
     """
     # Precompute delay if a limit is provided
-    min_delay: float = 60 / (max_rpm - 1) if max_rpm else 0
+    min_delay: float = 60 / max_rpm if max_rpm else 0
     last_call: float = 0
 
-    logger.info(f"Adding {len(corpus)} documents to {collection.name} collection.")
+    logger.info(f"Adding {len(corpus)} documents to `{collection.name}` collection.")
     for _, row in tqdm(corpus.iterrows(), total=len(corpus)):
         # Conditional rate limiting
         if max_rpm:
@@ -73,10 +73,18 @@ def add_to_collection(
         # Extract metadata
         inputs = {"content": row["content"]}
         metadata = metadata_extractor.crew().kickoff(inputs=inputs)
+        logger.debug(f"Metadata: {metadata}")
+
+        # Remove None values before sending to Chroma
+        metadata_dict = {k: v for k, v in metadata.json_dict.items() if v is not None}
+        null_keys = [k for k, v in metadata.json_dict.items() if v is None]
+
+        if null_keys:
+            logger.warning(f"Null metadata keys for `doc_id={row['doc_id']}`: {null_keys}")
 
         # Add to ChromaDB
         collection.add(
             ids=[str(row["doc_id"])],
             documents=[row["content"]],
-            metadatas=[metadata.json_dict]
+            metadatas=[metadata_dict]
         )
