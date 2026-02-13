@@ -35,8 +35,21 @@ def disable_dependency_loggers(dependencies: List[str]) -> None:
 def setup_logger() -> None:
     """Configure Loguru."""
     logger.remove()
-    logger.add(sys.stdout, format=LOG_FORMAT, level="DEBUG")
-    logger.add(sys.stderr, format=LOG_FORMAT, level="WARNING")
+
+    # Only DEBUG and INFO to stdout
+    logger.add(
+        sys.stdout,
+        format=LOG_FORMAT,
+        level="DEBUG",
+        filter=lambda r: r["level"].no < logger.level("WARNING").no,
+    )
+
+    # WARNING and above to stderr
+    logger.add(
+        sys.stderr,
+        format=LOG_FORMAT,
+        level="WARNING",
+    )
 
 
 # Run once when module is imported
