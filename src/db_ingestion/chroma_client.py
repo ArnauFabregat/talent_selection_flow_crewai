@@ -73,8 +73,7 @@ def add_to_collection(
         # Extract metadata
         inputs = {"content": row["content"]}
         metadata = metadata_extractor.crew().kickoff(inputs=inputs)
-
-        # logger.info(f"> Metadata: {metadata}")
+        logger.debug(f"Metadata: {metadata}")
 
         # Remove None values before sending to Chroma
         metadata_dict = {k: v for k, v in metadata.json_dict.items() if v is not None}
