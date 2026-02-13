@@ -55,10 +55,10 @@ def add_to_collection(
     optionally respecting a max requests-per-minute limit.
     """
     # Precompute delay if a limit is provided
-    min_delay: float = 60 / (max_rpm - 1) if max_rpm else 0
+    min_delay: float = 60 / max_rpm if max_rpm else 0
     last_call: float = 0
 
-    logger.info(f"Adding {len(corpus)} documents to {collection.name} collection.")
+    logger.info(f"Adding {len(corpus)} documents to `{collection.name}` collection.")
     for _, row in tqdm(corpus.iterrows(), total=len(corpus)):
         # Conditional rate limiting
         if max_rpm:

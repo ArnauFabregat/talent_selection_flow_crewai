@@ -4,7 +4,12 @@ from crewai import Agent, Crew, Task
 from src.config.params import VERBOSE
 from src.llm.llm_config import openrouter_llm
 from src.db_ingestion.schemas import CVMetadata, JobMetadata
-from src.utils.guardrails import validate_employment_type
+from src.utils.guardrails import (
+    validate_json_output,
+    validate_cvmetadata_schema,
+    validate_jobmetadata_schema,
+)
+from src.config.params import GUARDRAIL_MAX_RETRIES
 
 
 class CVMetadataExtractorCrew:
@@ -45,6 +50,8 @@ class CVMetadataExtractorCrew:
                             - Only return the JSON — no commentary before or after.
                             """,
             agent=metadata_extractor_agent,
+            guardrails=[validate_json_output, validate_cvmetadata_schema],
+            guardrail_max_retries=GUARDRAIL_MAX_RETRIES,
             output_json=CVMetadata,
         )
 
@@ -78,7 +85,7 @@ class JobMetadataExtractorCrew:
                             - country: job location country in ISO code
                             - city: job location city
                             - summary: 2-3 sentence overview of the role
-                            - employment_type: one of full-time/part-time/contract/freelance/other
+                            - employment_type: one of full-time/part-time/contract/freelance/other/unknown
                             - responsibilities: comma-separated key job responsibilities
                         """,
             expected_output="""Return a strict JSON object with the following structure:
@@ -97,8 +104,8 @@ class JobMetadataExtractorCrew:
                             - Only return the JSON — no commentary before or after.
                             """,
             agent=metadata_extractor_agent,
-            guardrail=validate_employment_type,
-            guardrail_max_retries=3,
+            guardrails=[validate_json_output, validate_jobmetadata_schema],
+            guardrail_max_retries=GUARDRAIL_MAX_RETRIES,
             output_json=JobMetadata,
         )
 

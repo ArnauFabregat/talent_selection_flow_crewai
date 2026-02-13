@@ -51,5 +51,5 @@ class JobMetadata(BaseProfile):
 
     title: str
     city: Optional[str] = None
-    employment_type: Literal["full-time", "part-time", "contract", "freelance", "other"]
+    employment_type: Literal["full-time", "part-time", "contract", "freelance", "other", "unknown"]
     responsibilities: Optional[str] = None
