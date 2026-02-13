@@ -74,9 +74,18 @@ def add_to_collection(
         inputs = {"content": row["content"]}
         metadata = metadata_extractor.crew().kickoff(inputs=inputs)
 
+        # logger.info(f"> Metadata: {metadata}")
+
+        # Remove None values before sending to Chroma
+        metadata_dict = {k: v for k, v in metadata.json_dict.items() if v is not None}
+        null_keys = [k for k, v in metadata.json_dict.items() if v is None]
+
+        if null_keys:
+            logger.warning(f"Null metadata keys for `doc_id={row['doc_id']}`: {null_keys}")
+
         # Add to ChromaDB
         collection.add(
             ids=[str(row["doc_id"])],
             documents=[row["content"]],
-            metadatas=[metadata.json_dict]
+            metadatas=[metadata_dict]
         )
