@@ -3,9 +3,9 @@
 An open-source multiagent system for talent selection using advanced AI techniques. This system leverages multiple specialized agents to analyze candidate profiles and job requirements, providing intelligent matching and insights.
 
 Tech Stack:
-- [**ChromaDB**](https://docs.trychroma.com/docs/overview/getting-started) - Vector database for semantic search and embeddings
 - [**CrewAI**](https://docs.crewai.com/en/quickstart) - Multi-agent orchestration framework
-- [**Groq**](https://console.groq.com) - LLM provider using `llama-3.3-70b-versatile` (free tier)
+- [**ChromaDB**](https://docs.trychroma.com/docs/overview/getting-started) - Vector database for semantic search and embeddings
+- [**OpenRouter**](https://openrouter.ai/) - LLM provider using `arcee-ai/trinity-large-preview:free` (free tier)
 - [**Jina**](https://jina.ai/) - Embedding model `jina-embeddings-v2-base-en` for semantic embeddings (free tier)
 - [**Chainlit**](https://docs.chainlit.io/get-started/overview) - LLM application UI framework
 
@@ -168,10 +168,11 @@ TBD
 
 ## TODO
 - Add documentation in README
-- Add gemini flash free llm, maybe have more TPM
-- Add guardrails (to check siso code?)
+- Add guardrail for country literals to be ISO, languages can be standarized?¿
+- Add notebook for data ingestion analysis: count unknown or other for literal fields, etc
+- Add VERBOSE param at class levels default False
+- Add values list in config/params for literal in metadata schemas
 - Add docstrings
-- Add git config for PR
 - Add unit tests
 - Add agent that validates info in linkedin ¿? (https://github.com/crewAIInc/crewAI-examples/blob/main/crews/recruitment/src/recruitment/tools/linkedin.py)
 - Tools:

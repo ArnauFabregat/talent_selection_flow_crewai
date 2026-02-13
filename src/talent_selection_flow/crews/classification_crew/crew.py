@@ -3,7 +3,7 @@
 from crewai import Agent, Crew, Task
 from crewai.project import CrewBase, agent, crew, task
 
-from llm.llm_config import groq_llm
+from llm.llm_config import gemini_llm
 from talent_selection_flow.crews.classification_crew.schemas.input import ParsedInput
 
 
@@ -20,7 +20,7 @@ class ClassificationCrew:
     def parser_agent(self) -> Agent:
         return Agent(
             config=self.agents_config["parser_agent"],
-            llm=groq_llm,
+            llm=gemini_llm,
             verbose=True,
         )
 
