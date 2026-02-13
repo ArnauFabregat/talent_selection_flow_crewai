@@ -49,6 +49,7 @@ def add_to_collection(
         corpus: pd.DataFrame,
         collection: Any,
         max_rpm: Optional[int] = None,
+        guardrail_max_retries: int = 3,
         verbose: bool = False,
 ) -> None:
     """
@@ -75,6 +76,7 @@ def add_to_collection(
         inputs = {"content": row["content"]}
         crew = metadata_extractor.crew()
         crew.verbose = verbose
+        crew.guardrail_max_retries = guardrail_max_retries
         metadata = crew.kickoff(inputs=inputs)
         logger.debug(f"Metadata: {metadata}")
 

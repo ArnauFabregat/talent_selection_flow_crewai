@@ -33,11 +33,13 @@ The system uses two primary datasets sourced from Kaggle to train and evaluate t
 
 Full Architecture Diagram (TBD)
 
-The system will do two main workflows:
+The system will do three main workflows:
+- Metadata extraction from raw cv or job
 - CV → Related Jobs → Gaps → Interview Questions → Final Report
 - Job → Related CVs → Gaps → Interview Questions → Final Report
 
 Agents description:
+0) Metadata extractor Agents: cvs and jobs.
 1) Orchestrator Agent.
     - **Role**: Entry point. Detects whether the user uploaded a CV or a job description and selects the correct workflow.
     - **Tools**: None or simple classification LLM.

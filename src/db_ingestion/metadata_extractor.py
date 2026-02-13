@@ -8,7 +8,6 @@ from src.utils.guardrails import (
     validate_cvmetadata_schema,
     validate_jobmetadata_schema,
 )
-from src.config.params import GUARDRAIL_MAX_RETRIES
 from src.db_ingestion.enums import ExperienceLevel, EducationLevel, EmploymentType
 
 
@@ -16,7 +15,8 @@ class CVMetadataExtractorCrew:
     """
     Agent extracts metadata from CVs
     """
-    def __init__(self, verbose: bool = False):
+    def __init__(self, guardrail_max_retries: int = 3, verbose: bool = False):
+        self._guardrail_max_retries = guardrail_max_retries
         self._verbose = verbose
 
     def crew(self) -> Crew:
@@ -53,7 +53,6 @@ Additional rules:
 """,
             agent=metadata_extractor_agent,
             guardrails=[validate_json_output, validate_cvmetadata_schema],
-            guardrail_max_retries=GUARDRAIL_MAX_RETRIES,
             output_json=CVMetadata,
         )
 
@@ -61,6 +60,7 @@ Additional rules:
             agents=[metadata_extractor_agent],
             tasks=[extract_metadata_task],
             verbose=self._verbose,
+            guardrail_max_retries=self._guardrail_max_retries
         )
 
 
@@ -68,7 +68,8 @@ class JobMetadataExtractorCrew:
     """
     Agent extracts metadata from job descriptions
     """
-    def __init__(self, verbose: bool = False):
+    def __init__(self, guardrail_max_retries: int = 3, verbose: bool = False):
+        self._guardrail_max_retries = guardrail_max_retries
         self._verbose = verbose
 
     def crew(self) -> Crew:
@@ -109,7 +110,6 @@ Additional rules:
 """,
             agent=metadata_extractor_agent,
             guardrails=[validate_json_output, validate_jobmetadata_schema],
-            guardrail_max_retries=GUARDRAIL_MAX_RETRIES,
             output_json=JobMetadata,
         )
 
@@ -117,4 +117,5 @@ Additional rules:
             agents=[metadata_extractor_agent],
             tasks=[extract_metadata_task],
             verbose=self._verbose,
+            guardrail_max_retries=self._guardrail_max_retries
         )
