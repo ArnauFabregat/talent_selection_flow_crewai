@@ -47,7 +47,7 @@ def setup_logger() -> None:
     # WARNING and above to stderr
     logger.add(
         sys.stderr,
-        format=LOG_FORMAT,
+        format="\n" + LOG_FORMAT,
         level="WARNING",
     )
 
