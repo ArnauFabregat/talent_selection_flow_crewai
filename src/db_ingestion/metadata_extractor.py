@@ -2,8 +2,9 @@
 from crewai import Agent, Crew, Task
 
 from src.config.params import VERBOSE
-from src.llm.llm_config import gemini_llm
+from src.llm.llm_config import openrouter_llm
 from src.db_ingestion.schemas import CVMetadata, JobMetadata
+from src.utils.guardrails import validate_employment_type
 
 
 class CVMetadataExtractorCrew:
@@ -15,7 +16,7 @@ class CVMetadataExtractorCrew:
             role="CV Metadata Extractor",
             goal="Extract structured metadata from CV text",
             backstory="You are an expert HR analyst who extracts structured info from unstructured CVs",
-            llm=gemini_llm,
+            llm=openrouter_llm,
             verbose=VERBOSE,
         )
 
@@ -24,10 +25,10 @@ class CVMetadataExtractorCrew:
                         \nExtract this metadata:
                             - skills: comma-separated list of required skills
                             - industries: comma-separated relevant industries
-                            - experience_level: one of intern/entry/intermediate/senior
+                            - experience_level: one of intern/entry/intermediate/senior/other/unknown
                             - country: candidate's location country in ISO code
                             - summary: 2-3 sentence overview of the role
-                            - education_level: one of highschool/bachelor/master/phd/other
+                            - education_level: one of highschool/bachelor/master/phd/other/unknown
                             - languages: comma-separated languages spoken or "unknown"
                         """,
             expected_output="""Return a strict JSON object with the following structure:
@@ -63,7 +64,7 @@ class JobMetadataExtractorCrew:
             role="Job Metadata Extractor",
             goal="Extract structured metadata from job description text",
             backstory="You are an expert HR analyst who extracts structured info from unstructured job descriptions",
-            llm=gemini_llm,
+            llm=openrouter_llm,
             verbose=VERBOSE,
         )
 
@@ -73,11 +74,11 @@ class JobMetadataExtractorCrew:
                             - title: exact job title as stated
                             - skills: comma-separated list of required skills
                             - industries: comma-separated relevant industries
-                            - experience_level: one of intern/entry/intermediate/senior
+                            - experience_level: one of intern/entry/intermediate/senior/other/unknown
                             - country: job location country in ISO code
                             - city: job location city
                             - summary: 2-3 sentence overview of the role
-                            - employment_type: full-time/part-time/contract/freelance if mentioned
+                            - employment_type: one of full-time/part-time/contract/freelance/other
                             - responsibilities: comma-separated key job responsibilities
                         """,
             expected_output="""Return a strict JSON object with the following structure:
@@ -96,6 +97,8 @@ class JobMetadataExtractorCrew:
                             - Only return the JSON — no commentary before or after.
                             """,
             agent=metadata_extractor_agent,
+            guardrail=validate_employment_type,
+            guardrail_max_retries=3,
             output_json=JobMetadata,
         )
 
