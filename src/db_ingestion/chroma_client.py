@@ -49,6 +49,7 @@ def add_to_collection(
         corpus: pd.DataFrame,
         collection: Any,
         max_rpm: Optional[int] = None,
+        verbose: bool = False,
 ) -> None:
     """
     Add documents with extracted metadata to a ChromaDB collection,
@@ -72,7 +73,9 @@ def add_to_collection(
 
         # Extract metadata
         inputs = {"content": row["content"]}
-        metadata = metadata_extractor.crew().kickoff(inputs=inputs)
+        crew = metadata_extractor.crew()
+        crew.verbose = verbose
+        metadata = crew.kickoff(inputs=inputs)
         logger.debug(f"Metadata: {metadata}")
 
         # Remove None values before sending to Chroma

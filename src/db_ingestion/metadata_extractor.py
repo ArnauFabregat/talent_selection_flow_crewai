@@ -1,7 +1,6 @@
 # @CrewBase class: wires YAML agents+tasks into a Crew
 from crewai import Agent, Crew, Task
 
-from src.config.params import VERBOSE
 from src.llm.llm_config import openrouter_llm
 from src.db_ingestion.schemas import CVMetadata, JobMetadata
 from src.utils.guardrails import (
@@ -17,13 +16,15 @@ class CVMetadataExtractorCrew:
     """
     Agent extracts metadata from CVs
     """
+    def __init__(self, verbose: bool = False):
+        self._verbose = verbose
+
     def crew(self) -> Crew:
         metadata_extractor_agent = Agent(
             role="CV Metadata Extractor",
             goal="Extract structured metadata from CV text",
             backstory="You are an expert HR analyst who extracts structured info from unstructured CVs",
             llm=openrouter_llm,
-            verbose=VERBOSE,
         )
 
         extract_metadata_task = Task(
@@ -59,7 +60,7 @@ Additional rules:
         return Crew(
             agents=[metadata_extractor_agent],
             tasks=[extract_metadata_task],
-            verbose=VERBOSE,
+            verbose=self._verbose,
         )
 
 
@@ -67,13 +68,15 @@ class JobMetadataExtractorCrew:
     """
     Agent extracts metadata from job descriptions
     """
+    def __init__(self, verbose: bool = False):
+        self._verbose = verbose
+
     def crew(self) -> Crew:
         metadata_extractor_agent = Agent(
             role="Job Metadata Extractor",
             goal="Extract structured metadata from job description text",
             backstory="You are an expert HR analyst who extracts structured info from unstructured job descriptions",
             llm=openrouter_llm,
-            verbose=VERBOSE,
         )
 
         extract_metadata_task = Task(
@@ -113,5 +116,5 @@ Additional rules:
         return Crew(
             agents=[metadata_extractor_agent],
             tasks=[extract_metadata_task],
-            verbose=VERBOSE,
+            verbose=self._verbose,
         )

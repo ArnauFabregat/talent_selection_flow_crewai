@@ -168,7 +168,6 @@ TBD
 
 ## TODO
 - Add documentation in README
-- Add VERBOSE param at class levels default False
 - Add docstrings
 - Add unit tests
 - Add agent that validates info in linkedin ¿? (https://github.com/crewAIInc/crewAI-examples/blob/main/crews/recruitment/src/recruitment/tools/linkedin.py)
