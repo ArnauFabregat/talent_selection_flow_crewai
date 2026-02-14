@@ -7,6 +7,8 @@ from tqdm import tqdm
 import pandas as pd
 
 from src.utils.logger import logger
+from src.constants import GUARDRAIL_MAX_RETRIES
+
 import chromadb
 from chromadb.utils.embedding_functions import JinaEmbeddingFunction
 from typing import Any, Optional
@@ -49,8 +51,8 @@ def add_to_collection(
         corpus: pd.DataFrame,
         collection: Any,
         max_rpm: Optional[int] = None,
-        guardrail_max_retries: int = 3,
         verbose: bool = False,
+        **kwargs,
 ) -> None:
     """
     Add documents with extracted metadata to a ChromaDB collection,
@@ -73,13 +75,16 @@ def add_to_collection(
             last_call = time.time()
 
         # Extract metadata
-        inputs = {"content": row["content"]}
+        inputs = {"content": row["content"], **kwargs}
+        metadata_extractor._verbose = verbose
         crew = metadata_extractor.crew()
-        crew.verbose = verbose
-        crew.guardrail_max_retries = guardrail_max_retries
-        metadata = crew.kickoff(inputs=inputs)
-        logger.debug(f"Metadata: {metadata}")
 
+        try:
+            metadata = crew.kickoff(inputs=inputs)
+            logger.debug(f"Metadata: {metadata}")
+        except Exception as e:
+            logger.error(f"Failed extraction for `doc_id={row.get('doc_id')}` due to error: {e}")
+            continue
         # Remove None values before sending to Chroma
         metadata_dict = {k: v for k, v in metadata.json_dict.items() if v is not None}
         null_keys = [k for k, v in metadata.json_dict.items() if v is None]

@@ -1,0 +1,16 @@
+# YAML-first agent definitions
+cv_metadata_extractor_agent:
+  role: >
+    CV Metadata Extractor
+  goal: >
+    Extract structured metadata from CV text.
+  backstory: >
+    You are an expert HR analyst who extracts structured info from unstructured CVs.
+
+job_metadata_extractor_agent:
+  role: >
+    Job Metadata Extractor
+  goal: >
+    Extract structured metadata from job description text.
+  backstory: >
+    You are an expert HR analyst who extracts structured info from unstructured job descriptions.
