@@ -3,7 +3,7 @@ from typing import Any, Tuple, List
 from crewai import TaskOutput
 from pycountry import countries
 
-from src.db_ingestion.enums import ExperienceLevel, EducationLevel, EmploymentType
+from src.db_ingestion.metadata_extraction_crew.enums import ExperienceLevel, EducationLevel, EmploymentType
 from src.utils.logger import logger
 
 
@@ -35,8 +35,10 @@ def validate_cvmetadata_schema(result: TaskOutput) -> Tuple[bool, Any]:
             fields.append("country")
             errors.append("country must be in ISO Alpha-2 code")
     if errors:
+        print("mal")
         logger.warning(f"Guardrail `validate_cvmetadata_schema` triggered for fields: {', '.join(fields)}")
         return (False, f"Fix these:\n{'; '.join(errors)}")
+    print("be")
     return (True, result)
 
 
@@ -59,6 +61,8 @@ def validate_jobmetadata_schema(result: TaskOutput) -> Tuple[bool, Any]:
             fields.append("country")
             errors.append("country must be in ISO Alpha-2 code")
     if errors:
+        print("mal")
         logger.warning(f"Guardrail `validate_jobmetadata_schema` triggered for fields: {', '.join(fields)}")
         return (False, f"Fix these:\n{'; '.join(errors)}")
+    print("be")
     return (True, result)

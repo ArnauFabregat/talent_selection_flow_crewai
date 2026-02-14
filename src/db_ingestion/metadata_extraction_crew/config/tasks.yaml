@@ -1,0 +1,56 @@
+# YAML-first task definitions
+extract_cv_metadata_task:
+  description: >
+    Extract metadata for this CV: {content}
+    Extract this metadata:
+    - skills: comma-separated list of required skills
+    - industries: comma-separated relevant industries
+    - experience_level: one of {experiencelevel_options}
+    - country: candidate's location country in ISO code Alpha-2
+    - summary: 1-2 sentence overview of the role
+    - education_level: one of {educationlevel_options}
+    - languages: comma-separated languages spoken or "unknown"
+
+  expected_output: >
+    Return a strict JSON object with the following structure:
+    {
+    "skills": "skill1, skill2, ...",
+    "industries": "industry1, industry2, ...",
+    "experience_level": "...",
+    "country": "...",
+    "summary": "...",
+    "education_level": "...",
+    "languages": "language1, language2, ...",
+    }
+    Additional rules:
+    - Only return the JSON — no commentary before or after.
+
+extract_job_metadata_task:
+  description: >
+    Extract metadata for this job description: {content}
+    Extract this metadata:
+    - title: exact job title as stated
+    - skills: comma-separated list of required skills
+    - industries: comma-separated relevant industries
+    - experience_level: one of {experiencelevel_options}
+    - country: job location country in ISO code Alpha-2
+    - city: job location city
+    - summary: 1-2 sentence overview of the role
+    - employment_type: one of {employmenttype_options}
+    - responsibilities: comma-separated key job responsibilities
+
+  expected_output: >
+    Return a strict JSON object with the following structure:
+    {
+    "title": "...",
+    "skills": "skill1, skill2, ...",
+    "industries": "industry1, industry2, ...",
+    "experience_level": "...",
+    "country": "...",
+    "city": "...",
+    "summary": "...",
+    "employment_type": "...",
+    "responsibilities": "resp1, resp2",
+    }
+    Additional rules:
+    - Only return the JSON — no commentary before or after.
