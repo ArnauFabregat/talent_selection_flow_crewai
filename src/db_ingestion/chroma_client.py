@@ -85,7 +85,6 @@ def add_to_collection(
         except Exception as e:
             logger.error(f"Failed extraction for `doc_id={row.get('doc_id')}` due to error: {e}")
             continue
-
         # Remove None values before sending to Chroma
         metadata_dict = {k: v for k, v in metadata.json_dict.items() if v is not None}
         null_keys = [k for k, v in metadata.json_dict.items() if v is None]

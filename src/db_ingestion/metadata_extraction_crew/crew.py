@@ -6,7 +6,6 @@ from src.constants import GUARDRAIL_MAX_RETRIES
 from src.llm.llm_config import openrouter_llm
 from src.db_ingestion.metadata_extraction_crew.schemas import CVMetadata, JobMetadata
 from src.utils.guardrails import (
-    validate_json_output,
     validate_cvmetadata_schema,
     validate_jobmetadata_schema,
 )
@@ -39,7 +38,7 @@ class CVMetadataExtractorCrew:
         return Task(
             config=self.tasks_config["extract_cv_metadata_task"],
             agent=self.metadata_extractor_agent(),
-            guardrails=[validate_json_output, validate_cvmetadata_schema],
+            guardrail=validate_cvmetadata_schema,
             guardrail_max_retries=self._guardrail_max_retries,
             output_json=CVMetadata,
         )
@@ -80,7 +79,7 @@ class JobMetadataExtractorCrew:
         return Task(
             config=self.tasks_config["extract_job_metadata_task"],
             agent=self.metadata_extractor_agent(),
-            guardrails=[validate_json_output, validate_jobmetadata_schema],
+            guardrail=validate_jobmetadata_schema,
             guardrail_max_retries=self._guardrail_max_retries,
             output_json=JobMetadata,
         )
