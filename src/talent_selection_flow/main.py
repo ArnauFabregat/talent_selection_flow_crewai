@@ -40,7 +40,7 @@ class TalentSelectionFlow(Flow[TalentState]):
             return "handle_cv"
         elif result == InputType.JOB:
             return "handle_job"
-        return InputType.OTHER
+        return "handle_unknown"
 
     @listen("handle_cv")
     def handle_cv(self) -> Any:
@@ -57,7 +57,7 @@ class TalentSelectionFlow(Flow[TalentState]):
         #     inputs={"content": self.state.raw_input}
         # )
 
-    @listen(InputType.OTHER)
+    @listen("handle_unknown")
     def handle_unknown(self) -> None:
         # TODO add custom error and import from exceptions.py
         raise ValueError(f"Invalid input type: '{self.state.input_type}'. Expected 'cv' or 'job'")
