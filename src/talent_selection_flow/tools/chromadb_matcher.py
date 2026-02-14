@@ -3,8 +3,8 @@ from pydantic import BaseModel, Field
 from typing import Any, Literal
 import chromadb
 
-from config.paths import CHROMA_DIR
-from exceptions import ChromaDBMatcherError
+from src.config.paths import CHROMA_DIR
+from src.exceptions import ChromaDBMatcherError
 
 
 class MatcherInput(BaseModel):

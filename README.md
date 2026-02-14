@@ -170,6 +170,7 @@ TBD
 
 ## TODO
 - Add documentation in README
+- Refactor metadata_extractor.py: prompts to yaml, enums as kickoff inputs
 - Add docstrings
 - Add unit tests
 - Add agent that validates info in linkedin ¿? (https://github.com/crewAIInc/crewAI-examples/blob/main/crews/recruitment/src/recruitment/tools/linkedin.py)

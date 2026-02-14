@@ -3,8 +3,7 @@
 from crewai import Agent, Crew, Task
 from crewai.project import CrewBase, agent, crew, task
 
-from llm.llm_config import gemini_llm
-from talent_selection_flow.crews.classification_crew.schemas.input import ParsedInput
+from src.llm.llm_config import openrouter_llm
 
 
 @CrewBase
@@ -20,7 +19,7 @@ class ClassificationCrew:
     def parser_agent(self) -> Agent:
         return Agent(
             config=self.agents_config["parser_agent"],
-            llm=gemini_llm,
+            llm=openrouter_llm,
             verbose=True,
         )
 
@@ -31,7 +30,7 @@ class ClassificationCrew:
             description=task_config["description"],
             expected_output=task_config["expected_output"],
             agent=self.parser_agent(),
-            output_pydantic=ParsedInput,
+            # TODO add guardrail to ensure output literals
         )
 
     @crew

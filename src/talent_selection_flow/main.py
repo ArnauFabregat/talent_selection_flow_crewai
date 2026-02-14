@@ -1,17 +1,23 @@
-from crewai.flow.flow import Flow, listen, router, start
+from crewai.flow.flow import Flow, listen, router, start, or_
 from pydantic import BaseModel
+from typing import Any,  Optional
+from enum import StrEnum
 
-from talent_selection_flow.crews.classification_crew.crew import ClassificationCrew
-from talent_selection_flow.crews.cv_to_job_crew.crew import CVToJobCrew
-from talent_selection_flow.crews.job_to_cv_crew.crew import JobToCVCrew
+from src.talent_selection_flow.crews.classification_crew.crew import ClassificationCrew
+from src.talent_selection_flow.crews.cv_to_job_crew.crew import CVToJobCrew
+# from src.talent_selection_flow.crews.job_to_cv_crew.crew import JobToCVCrew
 
-from typing import Any
+
+class InputType(StrEnum):
+    CV = "cv"
+    JOB = "job"
+    OTHER = "other"
 
 
 class TalentState(BaseModel):
-    raw_input: str = ""
-    input_type: str = ""
-    results: str = ""
+    raw_input: str = None
+    input_type: InputType = InputType.OTHER
+    results: Optional[str] = None
 
 
 class TalentSelectionFlow(Flow[TalentState]):
@@ -22,40 +28,49 @@ class TalentSelectionFlow(Flow[TalentState]):
     @start()
     def classify_input(self) -> str:
         result = ClassificationCrew().crew().kickoff(
-            inputs={"user_input": self.state.raw_input}
+            inputs={"user_input": self.state.raw_input,
+                    "output_options": "/".join(InputType)}
         )
-        self.state.input_type = result.raw.strip().lower()
+        self.state.input_type = result.raw
         return self.state.input_type
 
     @router(classify_input)
     def route_by_type(self, result: str) -> str:
-        if result == "cv":
-            return "cv"
-        elif result == "job":
-            return "job"
-        return "unknown"
+        if result == InputType.CV:
+            return "handle_cv"
+        elif result == InputType.JOB:
+            return "handle_job"
+        return InputType.OTHER
 
-    @listen("cv")
+    @listen("handle_cv")
     def handle_cv(self) -> Any:
-        return CVToJobCrew().crew().kickoff(
+        result = CVToJobCrew().crew().kickoff(
             inputs={"content": self.state.raw_input}
         )
+        self.state.results = result.raw
+        return result
 
-    @listen("job")
+    @listen("handle_job")
     def handle_job(self) -> Any:
-        return JobToCVCrew().crew().kickoff(
-            inputs={"content": self.state.raw_input}
-        )
+        return("Crew not implemented yet.")
+        # return JobToCVCrew().crew().kickoff(
+        #     inputs={"content": self.state.raw_input}
+        # )
 
-    @listen("unknown")
+    @listen(InputType.OTHER)
     def handle_unknown(self) -> None:
+        # TODO add custom error and import from exceptions.py
         raise ValueError(f"Invalid input type: '{self.state.input_type}'. Expected 'cv' or 'job'")
 
+    @listen(or_(handle_cv, handle_job))
+    def summarize_results(self) -> None:
+        print(f"Final output:\n{self.state.results}")
 
-def kickoff() -> None:
-    flow = TalentSelectionFlow()
-    flow.kickoff(inputs={"raw_input": "Your CV or job description here..."})
+
+# def kickoff() -> None:
+#     flow = TalentSelectionFlow()
+#     flow.kickoff(inputs={"raw_input": "Your CV or job description here..."})
 
 
-if __name__ == "__main__":
-    kickoff()
+# if __name__ == "__main__":
+#     kickoff()
