@@ -7,7 +7,6 @@ from tqdm import tqdm
 import pandas as pd
 
 from src.utils.logger import logger
-from src.constants import GUARDRAIL_MAX_RETRIES
 
 import chromadb
 from chromadb.utils.embedding_functions import JinaEmbeddingFunction

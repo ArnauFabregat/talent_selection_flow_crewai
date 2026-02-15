@@ -1,42 +1,12 @@
 # YAML-first task definitions
-retrieve_jobs_task:
-  description: >
-    You are given a CV as plain text in {content}.
-    Use the tool `query_jobs` to retrieve at most the top 5 most relevant job
-    postings from ChromaDB, based on semantic similarity.
-
-    For each retrieved job, extract:
-      - job_id
-      - similarity score
-
-    Return them in strictly structured JSON format.
-
-  expected_output: >
-    Strict JSON exactly matching the described schema:
-    {
-      "top_k": 0,
-      "results": [
-        {
-          "job_id": "JOB_ID",
-          "similarity": 0.0
-        }
-      ]
-    }
-
-    Additional rules:
-    - Only return the JSON — no commentary before or after.
-    - The number of returned items must match top_k.
-
 identify_gaps_task:
+# TODO think about passing full job description or skills field directly
   description: >
     Using the following inputs:
-    - Candidate CV: {content}
-    - Context
+    - Candidate CV: {raw_cv}
+    - Related jobs dictionary ("job_id": "job_description"): {related_jobs}
 
-    Analyze the top 5 matched jobs (or fewer if fewer were retrieved).
-
-    For each job_id, identify:
-      - overall_fit_score: the ChromaDB similarity score for that job
+    Analyze the jobs. For each job_id, identify:
       - matched_skills: skills that appear both in the job requirements and are clearly evidenced in the candidate CV
       - missing_must_have: required "must-have" skills/experiences not evidenced in the candidate CV
       - missing_nice_to_have: nice-to-have skills/experiences not evidenced in the candidate CV
@@ -48,7 +18,6 @@ identify_gaps_task:
     {
       "jobs": {
         "JOB_ID": {
-          "overall_fit_score": 0.0,
           "matched_skills": ["skill1", "skill2"],
           "missing_must_have": ["req1", "req2"],
           "missing_nice_to_have": ["req3", "req4"]
@@ -61,7 +30,7 @@ identify_gaps_task:
 generate_interview_questions_task:
   description: >
     Using:
-    - Candidate CV: {content}
+    - Candidate CV: {raw_cv}
     - Context
 
     For each analyzed job, generate 5-10 interview questions.

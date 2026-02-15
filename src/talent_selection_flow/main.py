@@ -1,5 +1,5 @@
 from crewai.flow.flow import Flow, listen, router, start, or_
-from typing import Any
+from typing import Any, Dict
 
 from src.constants import GUARDRAIL_MAX_RETRIES
 from src.utils.logger import logger
@@ -25,29 +25,46 @@ class TalentSelectionFlow(Flow[TalentState]):
 
     @start()
     def classify_input(self) -> str:
-        cl_crew = ClassificationCrew(
+        result = ClassificationCrew(
             verbose=self._verbose,
-            guardrail_max_retries=self._guardrail_max_retries
-        )
-        result = cl_crew.crew().kickoff(
+            guardrail_max_retries=self._guardrail_max_retries,
+        ).crew().kickoff(
             inputs={"user_input": self.state.raw_input,
                     "output_options": "/".join(DocumentType)}
         )
+        # TODO add 'country' inference to the output and ask for human validation
+        # country will be used as sql filter then
+        # self.state.inferred_country
         self.state.input_type = result.raw
-        return self.state.input_type
 
     @router(classify_input)
-    def route_by_type(self, result: str) -> str:
-        if result == DocumentType.CV:
+    def route_by_type(self) -> str:
+        if self.state.input_type == DocumentType.CV:
             return "route_cv"
-        elif result == DocumentType.JOB:
+        elif self.state.input_type == DocumentType.JOB:
             return "route_job"
         return "route_other"
 
     @listen("route_cv")
     def process_cv(self) -> Any:
-        result = CVToJobCrew().crew().kickoff(
-            inputs={"content": self.state.raw_input}
+        # TODO add here function to get matches from db. Output:
+        # {
+        # "top_k": 0,
+        # "results": [
+        #     {
+        #     "job_id": "JOB_ID",
+        #     "similarity": 0.0
+        #     }
+        # ]
+        # }
+        # {job_id: job_description}
+        related_jobs: Dict[str, str] = {}
+        result = CVToJobCrew(
+            verbose=self._verbose,
+            guardrail_max_retries=self._guardrail_max_retries,
+        ).crew().kickoff(
+            inputs={"raw_cv": self.state.raw_input,
+                    "related_jobs": related_jobs}
         )
         self.state.output = result.raw
 

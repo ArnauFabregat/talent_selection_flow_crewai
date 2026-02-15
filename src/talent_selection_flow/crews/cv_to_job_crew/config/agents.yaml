@@ -1,13 +1,4 @@
 # YAML-first agent definitions
-cv_job_retrieval_agent:
-  role: >
-    CV → Job Retrieval Specialist
-  goal: >
-    Retrieve the most relevant job postings for a given CV from ChromaDB.
-  backstory: >
-    You are an expert in semantic search and talent matching. You always use the provided tool
-    to retrieve job postings rather than inventing jobs.
-
 gap_identifier_agent:
   role: >
     Skill Gap Identifier
