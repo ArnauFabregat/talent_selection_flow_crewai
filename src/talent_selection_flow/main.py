@@ -1,23 +1,13 @@
 from crewai.flow.flow import Flow, listen, router, start, or_
 from pydantic import BaseModel
-from typing import Any,  Optional
-from enum import StrEnum
+from typing import Any
 
+from src.constants import GUARDRAIL_MAX_RETRIES
+from src.talent_selection_flow.crews.classification_crew.enums import InputType
+from src.talent_selection_flow.schemas import TalentState
 from src.talent_selection_flow.crews.classification_crew.crew import ClassificationCrew
 from src.talent_selection_flow.crews.cv_to_job_crew.crew import CVToJobCrew
 # from src.talent_selection_flow.crews.job_to_cv_crew.crew import JobToCVCrew
-
-
-class InputType(StrEnum):
-    CV = "cv"
-    JOB = "job"
-    OTHER = "other"
-
-
-class TalentState(BaseModel):
-    raw_input: str = None
-    input_type: InputType = InputType.OTHER
-    results: Optional[str] = None
 
 
 class TalentSelectionFlow(Flow[TalentState]):
@@ -25,9 +15,20 @@ class TalentSelectionFlow(Flow[TalentState]):
     Docstring for TalentSelectionFlow
     """
 
+    def __init__(self,
+                 guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
+                 verbose: bool = False
+    ):
+        self._guardrail_max_retries = guardrail_max_retries
+        self._verbose = verbose
+
     @start()
     def classify_input(self) -> str:
-        result = ClassificationCrew().crew().kickoff(
+        cl_crew = ClassificationCrew(
+            verbose=self._verbose,
+            guardrail_max_retries=self._guardrail_max_retries
+        )
+        result = cl_crew.crew().kickoff(
             inputs={"user_input": self.state.raw_input,
                     "output_options": "/".join(InputType)}
         )
