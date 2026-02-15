@@ -46,6 +46,7 @@ class CVMetadataExtractorCrew:
     @crew
     def crew(self) -> Crew:
         return Crew(
+            name="CV metadata extraction crew",
             agents=[self.metadata_extractor_agent()],
             tasks=[self.extract_metadata_task()],
             verbose=self._verbose,
@@ -87,6 +88,7 @@ class JobMetadataExtractorCrew:
     @crew
     def crew(self) -> Crew:
         return Crew(
+            name="Job metadata extraction crew",
             agents=[self.metadata_extractor_agent()],
             tasks=[self.extract_metadata_task()],
             verbose=self._verbose,

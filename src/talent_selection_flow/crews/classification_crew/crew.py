@@ -5,6 +5,7 @@ from crewai.project import CrewBase, agent, crew, task
 
 from src.constants import GUARDRAIL_MAX_RETRIES
 from src.llm.llm_config import openrouter_llm
+from src.talent_selection_flow.crews.classification_crew.guardrails import validate_classifier_output
 
 
 @CrewBase
@@ -37,13 +38,14 @@ class ClassificationCrew:
             description=task_config["description"],
             expected_output=task_config["expected_output"],
             agent=self.parser_agent(),
+            guardrail=validate_classifier_output,
             guardrail_max_retries=self._guardrail_max_retries,
-            # TODO add guardrail to ensure output literals
         )
 
     @crew
     def crew(self) -> Crew:
         return Crew(
+            name="Document classification crew",
             agents=[self.parser_agent()],
             tasks=[self.parse_task()],
             verbose=self._verbose,

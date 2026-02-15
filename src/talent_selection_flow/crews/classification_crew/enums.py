@@ -1,7 +1,7 @@
 from enum import StrEnum
 
 
-class InputType(StrEnum):
+class DocumentType(StrEnum):
     CV = "cv"
     JOB = "job"
     OTHER = "other"

@@ -1,10 +1,9 @@
 from pydantic import BaseModel
-from typing import Optional
 
-from src.talent_selection_flow.crews.classification_crew.enums import InputType
+from src.talent_selection_flow.crews.classification_crew.enums import DocumentType
 
 
 class TalentState(BaseModel):
-    raw_input: str = None
-    input_type: InputType = InputType.OTHER
-    results: Optional[str] = None
+    raw_input: str = ""
+    input_type: DocumentType = DocumentType.OTHER
+    output: str = ""
