@@ -1,23 +1,13 @@
 from crewai.flow.flow import Flow, listen, router, start, or_
-from pydantic import BaseModel
-from typing import Any,  Optional
-from enum import StrEnum
+from typing import Any
 
+from src.constants import GUARDRAIL_MAX_RETRIES
+from src.utils.logger import logger
+from src.talent_selection_flow.crews.classification_crew.enums import DocumentType
+from src.talent_selection_flow.schemas import TalentState
 from src.talent_selection_flow.crews.classification_crew.crew import ClassificationCrew
 from src.talent_selection_flow.crews.cv_to_job_crew.crew import CVToJobCrew
 # from src.talent_selection_flow.crews.job_to_cv_crew.crew import JobToCVCrew
-
-
-class InputType(StrEnum):
-    CV = "cv"
-    JOB = "job"
-    OTHER = "other"
-
-
-class TalentState(BaseModel):
-    raw_input: str = None
-    input_type: InputType = InputType.OTHER
-    results: Optional[str] = None
 
 
 class TalentSelectionFlow(Flow[TalentState]):
@@ -25,46 +15,58 @@ class TalentSelectionFlow(Flow[TalentState]):
     Docstring for TalentSelectionFlow
     """
 
+    def __init__(self,
+                 guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
+                 verbose: bool = False
+    ):
+        super().__init__()
+        self._guardrail_max_retries = guardrail_max_retries
+        self._verbose = verbose
+
     @start()
     def classify_input(self) -> str:
-        result = ClassificationCrew().crew().kickoff(
+        cl_crew = ClassificationCrew(
+            verbose=self._verbose,
+            guardrail_max_retries=self._guardrail_max_retries
+        )
+        result = cl_crew.crew().kickoff(
             inputs={"user_input": self.state.raw_input,
-                    "output_options": "/".join(InputType)}
+                    "output_options": "/".join(DocumentType)}
         )
         self.state.input_type = result.raw
         return self.state.input_type
 
     @router(classify_input)
     def route_by_type(self, result: str) -> str:
-        if result == InputType.CV:
-            return "handle_cv"
-        elif result == InputType.JOB:
-            return "handle_job"
-        return "handle_unknown"
+        if result == DocumentType.CV:
+            return "route_cv"
+        elif result == DocumentType.JOB:
+            return "route_job"
+        return "route_other"
 
-    @listen("handle_cv")
-    def handle_cv(self) -> Any:
+    @listen("route_cv")
+    def process_cv(self) -> Any:
         result = CVToJobCrew().crew().kickoff(
             inputs={"content": self.state.raw_input}
         )
-        self.state.results = result.raw
-        return result
+        self.state.output = result.raw
 
-    @listen("handle_job")
-    def handle_job(self) -> Any:
-        return("Crew not implemented yet.")
+    @listen("route_job")
+    def process_job(self) -> Any:
+        logger.warning("`JobToCVCrew` not implemented yet.")
+        self.state.output = "`JobToCVCrew` not implemented yet."
         # return JobToCVCrew().crew().kickoff(
         #     inputs={"content": self.state.raw_input}
         # )
 
-    @listen("handle_unknown")
-    def handle_unknown(self) -> None:
-        # TODO add custom error and import from exceptions.py
-        raise ValueError(f"Invalid input type: '{self.state.input_type}'. Expected 'cv' or 'job'")
+    @listen("route_other")
+    def handle_other(self) -> None:
+     logger.warning(f"Invalid document type: '{self.state.input_type}'. Expected '{DocumentType.CV}' or '{DocumentType.JOB}'")
+     self.state.output = f"Invalid document type: '{self.state.input_type}'. Expected '{DocumentType.CV}' or '{DocumentType.JOB}'"
 
-    @listen(or_(handle_cv, handle_job))
+    @listen(or_(process_cv, process_job, handle_other))
     def summarize_results(self) -> None:
-        print(f"Final output:\n{self.state.results}")
+        print(f"Final output:\n{self.state.output}")
 
 
 # def kickoff() -> None:

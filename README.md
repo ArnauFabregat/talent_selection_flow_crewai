@@ -172,6 +172,7 @@ TBD
 - Add documentation in README
 - Add docstrings
 - Add unit tests
+- Add chainlit and save logs in file
 - Add agent that validates info in linkedin ¿? (https://github.com/crewAIInc/crewAI-examples/blob/main/crews/recruitment/src/recruitment/tools/linkedin.py)
 - Tools:
     - crewai: https://docs.crewai.com/en/concepts/tools

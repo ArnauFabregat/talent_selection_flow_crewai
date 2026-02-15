@@ -5,7 +5,7 @@ from crewai.project import CrewBase, agent, crew, task
 from src.constants import GUARDRAIL_MAX_RETRIES
 from src.llm.llm_config import openrouter_llm
 from src.db_ingestion.metadata_extraction_crew.schemas import CVMetadata, JobMetadata
-from src.utils.guardrails import (
+from src.db_ingestion.metadata_extraction_crew.guardrails import (
     validate_cvmetadata_schema,
     validate_jobmetadata_schema,
 )
@@ -46,6 +46,7 @@ class CVMetadataExtractorCrew:
     @crew
     def crew(self) -> Crew:
         return Crew(
+            name="CV metadata extraction crew",
             agents=[self.metadata_extractor_agent()],
             tasks=[self.extract_metadata_task()],
             verbose=self._verbose,
@@ -87,6 +88,7 @@ class JobMetadataExtractorCrew:
     @crew
     def crew(self) -> Crew:
         return Crew(
+            name="Job metadata extraction crew",
             agents=[self.metadata_extractor_agent()],
             tasks=[self.extract_metadata_task()],
             verbose=self._verbose,
