@@ -21,9 +21,11 @@ class CVMetadataExtractorCrew:
 
     def __init__(self,
                  guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
-                 verbose: bool = False
+                 human_input: bool = False,
+                 verbose: bool = False,
     ):
         self._guardrail_max_retries = guardrail_max_retries
+        self._human_input = human_input
         self._verbose = verbose
 
     @agent
@@ -41,6 +43,7 @@ class CVMetadataExtractorCrew:
             guardrail=validate_cvmetadata_schema,
             guardrail_max_retries=self._guardrail_max_retries,
             output_json=CVMetadata,
+            human_input=self._human_input,
         )
 
     @crew

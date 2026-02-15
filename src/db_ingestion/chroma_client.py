@@ -7,6 +7,7 @@ from tqdm import tqdm
 import pandas as pd
 
 from src.utils.logger import logger
+from src.config.paths import CHROMA_DIR
 
 import chromadb
 from chromadb.utils.embedding_functions import JinaEmbeddingFunction
@@ -16,7 +17,7 @@ from typing import Any, Optional
 load_dotenv()
 
 
-def get_client(persist_dir: str) -> Any:
+def get_client(persist_dir: str = CHROMA_DIR) -> Any:
     """
     Initialize and return a ChromaDB client with the specified persistence directory.
     """
@@ -97,3 +98,25 @@ def add_to_collection(
             documents=[row["content"]],
             metadatas=[metadata_dict]
         )
+
+
+def query_to_collection(
+    collection_name: str,
+    query_text: str,
+    country: str,
+    persist_dir: str = CHROMA_DIR,
+    top_k: int = 3,
+):
+    # Init ChromaDB client
+    client = get_client(persist_dir)
+
+    # Get or create the "cvs" collection in ChromaDB
+    collection = get_collection(client, collection_name)
+
+    results = collection.query(
+        query_texts=[query_text],
+        n_results=top_k,
+        where={"country": country}
+    )
+    # TODO add logs to check if there was matches
+    return results

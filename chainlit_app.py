@@ -1,5 +1,5 @@
 import chainlit as cl
-from src.talent_selection_flow.main import TalentSelectionFlow
+from src.talent_selection_flow.flow import TalentSelectionFlow
 
 
 @cl.on_message

@@ -173,7 +173,8 @@ TBD
 - Add docstrings
 - Add unit tests
 - Add chainlit and save logs in file
-- Add agent that validates info in linkedin ¿? (https://github.com/crewAIInc/crewAI-examples/blob/main/crews/recruitment/src/recruitment/tools/linkedin.py)
+- Add pdf mapper if pdf input
+- Add agent that gets profiles from linkedin in JobToCVCrew ¿? (https://github.com/crewAIInc/crewAI-examples/blob/main/crews/recruitment/src/recruitment/tools/linkedin.py)
 - Tools:
     - crewai: https://docs.crewai.com/en/concepts/tools
     - langchain: https://docs.langchain.com/oss/python/integrations/tools
