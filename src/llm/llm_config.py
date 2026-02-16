@@ -27,5 +27,5 @@ openrouter_llm = LLM(
     model=os.getenv("LLM_OPENROUTER_MODEL"),
     base_url="https://openrouter.ai/api/v1",
     api_key=os.getenv("LLM_OPENROUTER_API_KEY"),
-    temperature=0.1,
+    temperature=0.6,
 )
