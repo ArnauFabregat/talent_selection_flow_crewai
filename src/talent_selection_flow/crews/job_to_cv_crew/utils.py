@@ -10,21 +10,21 @@ def render_to_markdown(
     report = [
         f"# Recruitment Analysis Report",
         f"*Date: {datetime.today().strftime('%Y-%m-%d')}*",
-        "\nThis document provides a comprehensive evaluation of the candidate against several targeted job roles. "
+        "\nThis document provides a comprehensive evaluation of the job role against several targeted candidates' cvs. "
         "The analysis was performed by an automated multi-agent system (CrewAI) that identifies skill gaps, "
         "calculates role similarity, and generates tailored interview strategies to bridge the identified technical voids.",
-        "## Candidate summary",
-        "*This section provides a high-level overview of the candidate's professional profile, extracting key technical "
+        "## Job summary",
+        "*This section provides a high-level overview of the job role, extracting key technical "
         "competencies, regional availability, and educational background to establish a baseline for comparison.*",
     ]
     # Add candidate info
     for k, v in metadata_dict.items():
         report.append(f"- **{k.replace("_", " ").capitalize()}**: {v}")
 
-    # Add matched jobs summary
-    report.append("## Matched jobs summary")
+    # Add matched cvs summary
+    report.append("## Matched cvs summary")
     report.append(
-        "*A curated list of roles that demonstrate high semantic alignment with the candidate's profile. Each match " \
+        "*A curated list of candidates' cvs that demonstrate high semantic alignment with the job role. Each match " \
         "includes a 'Similarity Score' (where 1.0 is a perfect match) and a summary of the responsibilities" \
         "the candidate would undertake.*"
     )
@@ -40,7 +40,7 @@ def render_to_markdown(
         "mandatory requirements.*"
     )
     for k, v in gap_analysis_output['docs'].items():
-        report.append(f"### Job ID: {k}")
+        report.append(f"### CV ID: {k}")
         for k2, v2 in v.items():
             report.append(f"- **{k2.replace("_", " ").capitalize()}**: {', '.join(v2)}")
 
@@ -52,7 +52,7 @@ def render_to_markdown(
         "seniority through behavioral scenarios.*"
     )
     for k, v in inverview_questions_output['docs'].items():
-        report.append(f"### Job ID: {k}")
+        report.append(f"### CV ID: {k}")
         for k2, v2 in v.items():
             report.append(f"- **{k2.replace("_", " ").capitalize()}**:")
             for i in v2:

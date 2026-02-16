@@ -44,35 +44,19 @@ Agents description:
     - **Role**: Entry point. Detects whether the user uploaded a CV or a job description and selects the correct workflow.
     - **Tools**: None or simple classification LLM.
     - **Goal**: Pick the correct pipeline (CV→JD or JD→CV).
-2) CV → Job Retrieval Agent.
-    - **Role**: Given a CV (plain text), embed & query ChromaDB to retrieve top X job descriptions.
-    - **Knowledge**: ChromaDB job embeddings.
-    - **Goal**: Return a ranked list of job postings related to the CV.
-3) Job → CV Retrieval Agent. This is symmetric to agent #2.
-    - **Role**: Given a job description, embed & query ChromaDB to retrieve top X candidate CVs.
-    - **Knowledge**: ChromaDB CV embeddings.
-    - **Goal**: Return a ranked list of candidates.
-4) Gap Identifier Agent.
+2) Gap Identifier Agent.
     - **Role**:
         - Compare candidate skills vs job requirements.
         - Identify missing skills (skill gaps).
         - Provide severity levels (must‑have / nice‑to‑have).
     - **Goal**: Output a structured JSON of gaps.
-5) Interview Question Generator Agent.
+3) Interview Question Generator Agent.
     - **Role**: Generate HR-friendly interview questions based on:
         - Skills matched
         - Skills missing
         - Ambiguities in experience
         - Seniority expectations
     - **Goal**: Provide 5–10 tailored questions per match.
-6) Report Writer Agent
-    - **Role**: Combine outputs into a clean, final PDF/text report:
-        - Top matches
-        - Score explanations
-        - Skill gaps
-        - Interview questions
-        - Overall recommendation
-    - **Goal**: Produce a polished summary for HR.
 
 ## How to Run
 TBD
