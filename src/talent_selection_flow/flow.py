@@ -52,7 +52,7 @@ class TalentSelectionFlow(Flow[TalentState]):
     def process_cv(self) -> Any:
         # Extract cv metadata
         metadata = CVMetadataExtractorCrew(
-            guardrail_max_retries=GUARDRAIL_MAX_RETRIES,
+            guardrail_max_retries=self._guardrail_max_retries,
             verbose=self._verbose,
             human_input=True,
         ).crew().kickoff(inputs={

@@ -35,8 +35,8 @@ class JobQuestions(BaseModel):
     ambiguity_clarification_questions: List[QuestionItem] = Field(
         description="Questions clarifying unclear information."
     )
-    seniority_question: QuestionItem = Field(
-        description="A single question assessing seniority alignment."
+    seniority_questions: List[QuestionItem] = Field(
+        description="Questions assessing seniority alignment."
     )
 
 
