@@ -3,7 +3,7 @@ from datetime import datetime
 
 def render_to_markdown(
         metadata_dict: dict,
-        related_jobs: dict,
+        related_docs: dict,
         gap_analysis_output: dict,
         inverview_questions_output: dict,
 ) -> str:
@@ -24,11 +24,11 @@ def render_to_markdown(
     # Add matched jobs summary
     report.append("## Matched jobs summary")
     report.append(
-        "*A curated list of roles that demonstrate high semantic alignment with the candidate's profile. Each match" \
+        "*A curated list of roles that demonstrate high semantic alignment with the candidate's profile. Each match " \
         "includes a 'Similarity Score' (where 1.0 is a perfect match) and a summary of the responsibilities" \
         "the candidate would undertake.*"
     )
-    for k, v in related_jobs.items():
+    for k, v in related_docs.items():
         report.append(f"### {v['title']} (ID: {k})")
         for k2, v2 in v.items():
             report.append(f"- **{k2.replace("_", " ").capitalize()}**: {v2}")
@@ -36,10 +36,10 @@ def render_to_markdown(
     # Add gaps analysis
     report.append("## Gaps analysis")
     report.append(
-        "*An objective technical audit identifying the delta between the candidate's current skillset and the job's" \
+        "*An objective technical audit identifying the delta between the candidate's current skillset and the job's " \
         "mandatory requirements.*"
     )
-    for k, v in gap_analysis_output['jobs'].items():
+    for k, v in gap_analysis_output['docs'].items():
         report.append(f"### Job ID: {k}")
         for k2, v2 in v.items():
             report.append(f"- **{k2.replace("_", " ").capitalize()}**: {', '.join(v2)}")
@@ -51,7 +51,7 @@ def render_to_markdown(
         "strengths, probe the specific gaps identified in the previous section, and assess the candidate's " \
         "seniority through behavioral scenarios.*"
     )
-    for k, v in inverview_questions_output['jobs'].items():
+    for k, v in inverview_questions_output['docs'].items():
         report.append(f"### Job ID: {k}")
         for k2, v2 in v.items():
             report.append(f"- **{k2.replace("_", " ").capitalize()}**:")

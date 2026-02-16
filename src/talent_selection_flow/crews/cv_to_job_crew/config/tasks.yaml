@@ -9,7 +9,7 @@ identify_gaps_task:
     1. The `Matched Jobs Dictionary` contains top matches where the key is the Job ID.
     2. For each Job ID, compare the `skills`, `industries`, `experience_level`, and `summary` against the Candidate's CV.
     3. Identify specific "Gaps"—missing technologies, years of experience, or industry exposure.
-    4. Do not hallucinate skills; if the CV doesn't explicitly mention a skill required in the `summary`, mark it as a potential gap.
+    4. Do not hallucinate skills; if the CV doesn't explicitly mention a skill required, mark it as a potential gap.
 
   expected_output: >
     For each job_id, identify:
@@ -18,7 +18,7 @@ identify_gaps_task:
 
     The output must organize results per job_id and follow a strict JSON structure:
     {
-      "jobs": {
+      "docs": {
         "JOB_ID": {
           "matched_skills": ["skill1", "skill2"],
           "missing_must_have": ["req1", "req2"],
@@ -43,7 +43,7 @@ generate_interview_questions_task:
   expected_output: >
     Return a strict JSON object with the following structure:
     {
-      "jobs": {
+      "docs": {
         "JOB_ID": {
           "matched_skill_questions": [
             {"question": "...", "response": "..."}

@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import List, Dict
 
 
-class JobGapAnalysis(BaseModel):
+class GapAnalysis(BaseModel):
     matched_skills: List[str] = Field(
         description="Skills evidenced in the CV that match the job requirements."
     )
@@ -12,7 +12,7 @@ class JobGapAnalysis(BaseModel):
 
 
 class GapAnalysisOutput(BaseModel):
-    jobs: Dict[str, JobGapAnalysis] = Field(
+    docs: Dict[str, GapAnalysis] = Field(
         description="Mapping of job_id to its gap analysis result."
     )
 
@@ -22,7 +22,7 @@ class QuestionItem(BaseModel):
     response: str = Field(description="The correct response to the question.")
 
 
-class JobQuestions(BaseModel):
+class Questions(BaseModel):
     matched_skill_questions: List[QuestionItem] = Field(
         description="Questions validating matched skills."
     )
@@ -38,4 +38,4 @@ class JobQuestions(BaseModel):
 
 
 class InterviewQuestionsOutput(BaseModel):
-    jobs: Dict[str, JobQuestions] = Field(description="Mapping of job_id to its interview question set.")
+    docs: Dict[str, Questions] = Field(description="Mapping of job_id to its interview question set.")

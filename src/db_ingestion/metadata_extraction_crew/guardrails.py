@@ -33,7 +33,7 @@ def validate_cvmetadata_schema(result: TaskOutput) -> Tuple[bool, Any]:
     if data.get("country"):
         if countries.get(alpha_2=data.get("country")) is None:
             fields.append("country")
-            errors.append("country must be in ISO Alpha-2 code")
+            errors.append(f"{data.get("country")} is not valid. Must be a country and in ISO Alpha-2 code")
 
     # 4. Return
     if errors:
