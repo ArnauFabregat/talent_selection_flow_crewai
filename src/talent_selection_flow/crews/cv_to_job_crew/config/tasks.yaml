@@ -3,8 +3,14 @@ identify_gaps_task:
 # TODO think about passing full job description or skills field directly
   description: >
     Using the following inputs:
-    - Candidate CV: {raw_cv}
-    - Related jobs dictionary ("job_id": "job_description"): {related_jobs}
+    - Candidate CV: {structured_cv}
+    - Matched Jobs Dictionary: {related_jobs}
+
+    Instructions:
+    1. The `Matched Jobs Dictionary` contains top matches where the key is the Job ID.
+    3. For each Job ID, compare the `skills`, `industries`, `experience_level`, and `summary` against the Candidate's CV.
+    4. Identify specific "Gaps"—missing technologies, years of experience, or industry exposure.
+    5. Do not hallucinate skills; if the CV doesn't explicitly mention a skill required in the `summary`, mark it as a potential gap.
 
     Analyze the jobs. For each job_id, identify:
       - matched_skills: skills that appear both in the job requirements and are clearly evidenced in the candidate CV

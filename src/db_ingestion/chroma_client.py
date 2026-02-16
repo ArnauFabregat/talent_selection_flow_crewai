@@ -11,7 +11,7 @@ from src.config.paths import CHROMA_DIR
 
 import chromadb
 from chromadb.utils.embedding_functions import JinaEmbeddingFunction
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 # Load environment variables from .env file
 load_dotenv()
@@ -100,23 +100,77 @@ def add_to_collection(
         )
 
 
+def reshape_chroma_results(chroma_output: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Output format:
+    {
+    "JOB_ID": {
+        "title": "Official job title",
+        "similarity": 0.85, // Higher is better (range 0 to 1)
+        "skills": "Key technical requirements",
+        "industries": "Relevant market sectors",
+        "experience_level": "Required seniority level",
+        "summary": "Detailed responsibilities and job context",
+        "country": "Job location country",
+    }
+    }
+    """
+    # Dictionary comprehension; we take the first index [0] 
+    # because you likely queried with a single CV.
+    ids = chroma_output['ids'][0]
+    distances = chroma_output['distances'][0]
+    metadatas = chroma_output['metadatas'][0]
+    
+    return {
+        ids[i]: {
+            "title": metadatas[i].get("title", ""),  # will be empty in de cvs collection
+            "similarity": 1 - round(distances[i], 4),
+            "skills": metadatas[i].get("skills", ""),
+            "industries": metadatas[i].get("industries", ""),
+            "experience_level": metadatas[i].get("experience_level", ""),
+            "summary": metadatas[i].get("summary", ""),
+            "country": metadatas[i].get("country", ""),
+        }
+        for i in range(len(ids))
+    }
+
+
 def query_to_collection(
     collection_name: str,
     query_text: str,
     country: str,
     persist_dir: str = CHROMA_DIR,
     top_k: int = 3,
-):
-    # Init ChromaDB client
-    client = get_client(persist_dir)
+) -> Dict[str, Any]:
+    """
+    Retrieves the most relevant documents from ChromaDB with a metadata fallback strategy.
+    """
+    # Initialize client and access collection
+    client = get_client(persist_dir=persist_dir)
+    collection = get_collection(client=client, collection_name=collection_name)
 
-    # Get or create the "cvs" collection in ChromaDB
-    collection = get_collection(client, collection_name)
+    logger.info(f"Initiating vector search in collection '{collection_name}' (Top K: {top_k})")
 
-    results = collection.query(
-        query_texts=[query_text],
-        n_results=top_k,
-        where={"country": country}
-    )
-    # TODO add logs to check if there was matches
-    return results
+    # Primary Search: Strict filtering by country
+    if country:
+        results = collection.query(
+            query_texts=[query_text],
+            n_results=top_k,
+            where={"country": country}
+        )
+
+    # Fallback Strategy: If no results found with country filter, widen the search
+    if (country is None) or (results["ids"] == [[]]):
+        logger.warning(
+            f"No matches found for country '{country}'. "
+            "Broadening search to all regions to ensure candidate visibility."
+        )
+        results = collection.query(
+            query_texts=[query_text],
+            n_results=top_k,
+        )
+
+    formatted_results = reshape_chroma_results(chroma_output=results)
+    logger.debug(f"Final formatted results:\n{formatted_results}")
+
+    return formatted_results

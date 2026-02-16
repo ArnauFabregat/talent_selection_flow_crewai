@@ -172,9 +172,12 @@ TBD
 - Add documentation in README
 - Add docstrings
 - Add unit tests
+- Add max_iter and max_rpm to control rate limits in agents
 - Add chainlit and save logs in file
 - Add pdf mapper if pdf input
-- Add agent that gets profiles from linkedin in JobToCVCrew ¿? (https://github.com/crewAIInc/crewAI-examples/blob/main/crews/recruitment/src/recruitment/tools/linkedin.py)
+- Add agent that gets profiles from linkedin in JobToCVCrew
+    - https://github.com/crewAIInc/crewAI-examples/blob/main/crews/recruitment/src/recruitment/tools/linkedin.py
+    - add reasoning True with max_reasoning_attempts
 - Tools:
     - crewai: https://docs.crewai.com/en/concepts/tools
     - langchain: https://docs.langchain.com/oss/python/integrations/tools

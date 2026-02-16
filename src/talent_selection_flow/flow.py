@@ -50,7 +50,7 @@ class TalentSelectionFlow(Flow[TalentState]):
 
     @listen("route_cv")
     def process_cv(self) -> Any:
-        # TODO add metadata extraction crew
+        # Extract cv metadata
         metadata = CVMetadataExtractorCrew(
             guardrail_max_retries=GUARDRAIL_MAX_RETRIES,
             verbose=self._verbose,
@@ -61,34 +61,24 @@ class TalentSelectionFlow(Flow[TalentState]):
             "experiencelevel_options": "/".join(ExperienceLevel),
         })
         metadata_dict = json.loads(metadata.raw)
-        # TODO add here function to get matches from db. Output:
-        # {
-        # "top_k": 0,
-        # "results": [
-        #     {
-        #     "job_id": "JOB_ID",
-        #     "similarity": 0.0
-        #     }
-        # ]
-        # }
-        # {job_id: job_description}
-        result = query_to_collection(
+
+        # Get matches from jobs collection
+        related_jobs = query_to_collection(
             collection_name="jobs",
             query_text=self.state.raw_input,
             country=metadata_dict.get("country"),
             top_k=3,
         )
-        self.state.output = result
 
-        # related_jobs: Dict[str, str] = {}
-        # result = CVToJobCrew(
-        #     verbose=self._verbose,
-        #     guardrail_max_retries=self._guardrail_max_retries,
-        # ).crew().kickoff(
-        #     inputs={"raw_cv": self.state.raw_input,
-        #             "related_jobs": related_jobs}
-        # )
-        # self.state.output = result.raw
+        # Send info to CVToJobCrew
+        result = CVToJobCrew(
+            verbose=self._verbose,
+            guardrail_max_retries=self._guardrail_max_retries,
+        ).crew().kickoff(
+            inputs={"structured_cv": metadata_dict,
+                    "related_jobs": related_jobs}
+        )
+        self.state.output = result.raw
 
     @listen("route_job")
     def process_job(self) -> Any:
