@@ -5,6 +5,7 @@ import os
 import time
 from tqdm import tqdm
 import pandas as pd
+import json
 
 from src.utils.logger import logger
 from src.config.paths import CHROMA_DIR
@@ -81,7 +82,7 @@ def add_to_collection(
 
         try:
             metadata = crew.kickoff(inputs=inputs)
-            logger.debug(f"Metadata: {metadata}")
+            logger.debug(f"Metadata:\n{json.loads(metadata.raw)}")
         except Exception as e:
             logger.error(f"Failed extraction for `doc_id={row.get('doc_id')}` due to error: {e}")
             continue
