@@ -125,7 +125,7 @@ def reshape_chroma_results(chroma_output: Dict[str, Any]) -> Dict[str, Any]:
     return {
         ids[i]: {
             "title": metadatas[i].get("title", ""),  # will be empty in de cvs collection
-            "similarity": 1 - round(distances[i], 4),
+            "similarity": round(1 - distances[i], 4),
             "skills": metadatas[i].get("skills", ""),
             "industries": metadatas[i].get("industries", ""),
             "experience_level": metadatas[i].get("experience_level", ""),

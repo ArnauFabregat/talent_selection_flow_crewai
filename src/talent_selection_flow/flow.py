@@ -60,7 +60,7 @@ class TalentSelectionFlow(Flow[TalentState]):
         metadata = CVMetadataExtractorCrew(
             guardrail_max_retries=self._guardrail_max_retries,
             verbose=self._verbose,
-            human_input=True,
+            human_input=False,
         ).crew().kickoff(inputs={
             "content": self.state.raw_input,
             "educationlevel_options": "/".join(EducationLevel),

@@ -170,7 +170,6 @@ TBD
 
 ## TODO
 - Add top_k from input optional
-- Add guardrail for generate_interview_questions_task
 - Add documentation in README
 - Add docstrings
 - Add unit tests

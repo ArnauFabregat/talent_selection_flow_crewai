@@ -6,7 +6,10 @@ from crewai.project import CrewBase, agent, crew, task
 from src.constants import GUARDRAIL_MAX_RETRIES
 from src.llm.llm_config import openrouter_llm
 from src.talent_selection_flow.crews.cv_to_job_crew.schemas import GapAnalysisOutput, InterviewQuestionsOutput
-from src.talent_selection_flow.crews.cv_to_job_crew.guardrails import validate_gapanalysisoutput_schema
+from src.talent_selection_flow.crews.cv_to_job_crew.guardrails import (
+    validate_gapanalysisoutput_schema,
+    validate_interviewquestionsoutput_schema,
+)
 
 
 @CrewBase
@@ -28,9 +31,6 @@ class CVToJobCrew:
         self._guardrail_max_retries = guardrail_max_retries
         self._verbose = verbose
 
-    # -----------------------
-    # Agents
-    # -----------------------
     @agent
     def gap_identifier_agent(self) -> Agent:
         return Agent(
@@ -45,9 +45,6 @@ class CVToJobCrew:
             llm=openrouter_llm,
         )
 
-    # -----------------------
-    # Tasks
-    # -----------------------
     @task
     def identify_gaps_task(self) -> Task:
         task_config = self.tasks_config["identify_gaps_task"]
@@ -68,13 +65,11 @@ class CVToJobCrew:
             expected_output=task_config["expected_output"],
             agent=self.interview_question_generator_agent(),
             context=[self.identify_gaps_task()],
+            guardrail=validate_interviewquestionsoutput_schema,
             guardrail_max_retries=self._guardrail_max_retries,
             output_json=InterviewQuestionsOutput,
         )
 
-    # -----------------------
-    # Crew
-    # -----------------------
     @crew
     def crew(self) -> Crew:
         return Crew(
