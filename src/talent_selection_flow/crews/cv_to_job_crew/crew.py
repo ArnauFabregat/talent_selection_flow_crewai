@@ -11,6 +11,7 @@ from src.constants import GUARDRAIL_MAX_RETRIES
 from src.config.paths import REPORT_OUTPUT_PATH
 from src.llm.llm_config import openrouter_llm
 from src.talent_selection_flow.crews.cv_to_job_crew.schemas import GapAnalysisOutput, InterviewQuestionsOutput
+from src.talent_selection_flow.crews.cv_to_job_crew.guardrails import validate_gapanalysisoutput_schema
 
 
 @CrewBase
@@ -70,6 +71,7 @@ class CVToJobCrew:
             description=task_config["description"],
             expected_output=task_config["expected_output"],
             agent=self.gap_identifier_agent(),
+            guardrail=validate_gapanalysisoutput_schema,
             guardrail_max_retries=self._guardrail_max_retries,
             output_json=GapAnalysisOutput,
         )
@@ -81,7 +83,7 @@ class CVToJobCrew:
             description=task_config["description"],
             expected_output=task_config["expected_output"],
             agent=self.interview_question_generator_agent(),
-            context=[self.retrieve_jobs_task(), self.identify_gaps_task()],
+            context=[self.identify_gaps_task()],
             guardrail_max_retries=self._guardrail_max_retries,
             output_json=InterviewQuestionsOutput,
         )
@@ -94,13 +96,12 @@ class CVToJobCrew:
             expected_output=task_config["expected_output"],
             agent=self.report_writer_agent(),
             context=[
-                self.retrieve_jobs_task(),
                 self.identify_gaps_task(),
                 self.generate_interview_questions_task(),
             ],
             guardrail_max_retries=self._guardrail_max_retries,
             markdown=True,
-            output_file=REPORT_OUTPUT_PATH,
+            output_file=str(REPORT_OUTPUT_PATH),
         )
 
     # -----------------------
@@ -109,6 +110,7 @@ class CVToJobCrew:
     @crew
     def crew(self) -> Crew:
         return Crew(
+            name="CV to Job crew",
             agents=[
                 self.gap_identifier_agent(),
                 self.interview_question_generator_agent(),
