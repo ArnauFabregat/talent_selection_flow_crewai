@@ -33,11 +33,13 @@ The system uses two primary datasets sourced from Kaggle to train and evaluate t
 
 Full Architecture Diagram (TBD)
 
-The system will do two main workflows:
+The system will do three main workflows:
+- Metadata extraction from raw cv or job
 - CV → Related Jobs → Gaps → Interview Questions → Final Report
 - Job → Related CVs → Gaps → Interview Questions → Final Report
 
 Agents description:
+0) Metadata extractor Agents: cvs and jobs.
 1) Orchestrator Agent.
     - **Role**: Entry point. Detects whether the user uploaded a CV or a job description and selects the correct workflow.
     - **Tools**: None or simple classification LLM.
@@ -167,14 +169,16 @@ All code contributions are subject to peer review. Detailed review guidelines an
 TBD
 
 ## TODO
+- Add top_k from input optional
 - Add documentation in README
-- Add guardrail for country literals to be ISO, languages can be standarized?¿
-- Add notebook for data ingestion analysis: count unknown or other for literal fields, etc
-- Add VERBOSE param at class levels default False
-- Add values list in config/params for literal in metadata schemas
 - Add docstrings
 - Add unit tests
-- Add agent that validates info in linkedin ¿? (https://github.com/crewAIInc/crewAI-examples/blob/main/crews/recruitment/src/recruitment/tools/linkedin.py)
+- Add max_iter and max_rpm to control rate limits in agents
+- Add chainlit and save logs in file
+- Add pdf mapper if pdf input
+- Add agent that gets profiles from linkedin in JobToCVCrew
+    - https://github.com/crewAIInc/crewAI-examples/blob/main/crews/recruitment/src/recruitment/tools/linkedin.py
+    - add reasoning True with max_reasoning_attempts
 - Tools:
     - crewai: https://docs.crewai.com/en/concepts/tools
     - langchain: https://docs.langchain.com/oss/python/integrations/tools

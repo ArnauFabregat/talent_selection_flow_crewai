@@ -1,17 +1,15 @@
 # @CrewBase class: wires YAML agents+tasks into a Crew
 # type: ignore
-import os
-from pathlib import Path
-
-from dotenv import load_dotenv
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 
-from config.paths import REPORT_OUTPUT_PATH
-from llm.llm_config import gemini_llm
-from talent_selection_flow.tools.chromadb_matcher import ChromaDBMatcherTool
-from talent_selection_flow.crews.cv_to_job_crew.schemas.match import RetrievalResult
-from talent_selection_flow.crews.cv_to_job_crew.schemas.report import GapAnalysisOutput, InterviewQuestionsOutput
+from src.constants import GUARDRAIL_MAX_RETRIES
+from src.llm.llm_config import openrouter_llm
+from src.talent_selection_flow.crews.cv_to_job_crew.schemas import GapAnalysisOutput, InterviewQuestionsOutput
+from src.talent_selection_flow.crews.cv_to_job_crew.guardrails import (
+    validate_gapanalysisoutput_schema,
+    validate_interviewquestionsoutput_schema,
+)
 
 
 @CrewBase
@@ -26,60 +24,25 @@ class CVToJobCrew:
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
 
-    def __init__(self) -> None:
-        load_dotenv()
-        # Ensure report directory exists
-        out_path = Path(os.getenv(REPORT_OUTPUT_PATH))
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-
-    # -----------------------
-    # Agents
-    # -----------------------
-    @agent
-    def cv_job_retrieval_agent(self) -> Agent:
-        return Agent(
-            config=self.agents_config["cv_job_retrieval_agent"],
-            tools=[ChromaDBMatcherTool(chroma_path=os.getenv("CHROMA_DB_PATH"))],
-            llm=gemini_llm,
-            verbose=True,
-        )
+    def __init__(self,
+                 guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
+                 verbose: bool = False,
+    ) -> None:
+        self._guardrail_max_retries = guardrail_max_retries
+        self._verbose = verbose
 
     @agent
     def gap_identifier_agent(self) -> Agent:
-        # TODO: tool to load job descriptions for the identified job_ids
         return Agent(
             config=self.agents_config["gap_identifier_agent"],
-            llm=gemini_llm,
-            verbose=True,
+            llm=openrouter_llm,
         )
 
     @agent
     def interview_question_generator_agent(self) -> Agent:
         return Agent(
             config=self.agents_config["interview_question_generator_agent"],
-            llm=gemini_llm,
-            verbose=True,
-        )
-
-    @agent
-    def report_writer_agent(self) -> Agent:
-        return Agent(
-            config=self.agents_config["report_writer_agent"],
-            llm=gemini_llm,
-            verbose=True,
-        )
-
-    # -----------------------
-    # Tasks
-    # -----------------------
-    @task
-    def retrieve_jobs_task(self) -> Task:
-        task_config = self.tasks_config["retrieve_jobs_task"]
-        return Task(
-            description=task_config["description"],
-            expected_output=task_config["expected_output"],
-            agent=self.cv_job_retrieval_agent(),
-            output_json=RetrievalResult,
+            llm=openrouter_llm,
         )
 
     @task
@@ -89,7 +52,8 @@ class CVToJobCrew:
             description=task_config["description"],
             expected_output=task_config["expected_output"],
             agent=self.gap_identifier_agent(),
-            context=[self.retrieve_jobs_task()],
+            guardrail=validate_gapanalysisoutput_schema,
+            guardrail_max_retries=self._guardrail_max_retries,
             output_json=GapAnalysisOutput,
         )
 
@@ -100,44 +64,24 @@ class CVToJobCrew:
             description=task_config["description"],
             expected_output=task_config["expected_output"],
             agent=self.interview_question_generator_agent(),
-            context=[self.retrieve_jobs_task(), self.identify_gaps_task()],
+            context=[self.identify_gaps_task()],
+            guardrail=validate_interviewquestionsoutput_schema,
+            guardrail_max_retries=self._guardrail_max_retries,
             output_json=InterviewQuestionsOutput,
         )
 
-    @task
-    def write_report_task(self) -> Task:
-        task_config = self.tasks_config["write_report_task"]
-        return Task(
-            description=task_config["description"],
-            expected_output=task_config["expected_output"],
-            agent=self.report_writer_agent(),
-            context=[
-                self.retrieve_jobs_task(),
-                self.identify_gaps_task(),
-                self.generate_interview_questions_task(),
-            ],
-            markdown=True,
-            output_file=REPORT_OUTPUT_PATH,
-        )
-
-    # -----------------------
-    # Crew
-    # -----------------------
     @crew
     def crew(self) -> Crew:
         return Crew(
+            name="CV to Job crew",
             agents=[
-                self.cv_job_retrieval_agent(),
                 self.gap_identifier_agent(),
                 self.interview_question_generator_agent(),
-                self.report_writer_agent(),
             ],
             tasks=[
-                self.retrieve_jobs_task(),
                 self.identify_gaps_task(),
                 self.generate_interview_questions_task(),
-                self.write_report_task(),
             ],
             process=Process.sequential,
-            verbose=True,
+            verbose=self._verbose,
         )

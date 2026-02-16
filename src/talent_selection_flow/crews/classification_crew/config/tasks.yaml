@@ -1,7 +1,8 @@
 # YAML-first task definitions
 parse_task:
   description: >
-    Analyze this input and classify it:\n{user_input}
+    Analyze this document and classify it:
+    {user_input}
 
   expected_output: >
-    Single string label that best describes the input. Choose from: "job", "cv", "unknown".
+    Single string label that best describes the input. Choose from: {output_options}.
