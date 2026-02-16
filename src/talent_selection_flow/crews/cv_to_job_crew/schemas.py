@@ -9,9 +9,6 @@ class JobGapAnalysis(BaseModel):
     missing_must_have: List[str] = Field(
         description="Must-have requirements not evidenced in the CV."
     )
-    missing_nice_to_have: List[str] = Field(
-        description="Nice-to-have requirements not evidenced in the CV."
-    )
 
 
 class GapAnalysisOutput(BaseModel):

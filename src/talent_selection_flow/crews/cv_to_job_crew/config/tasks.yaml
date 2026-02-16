@@ -15,7 +15,6 @@ identify_gaps_task:
     For each job_id, identify:
       - matched_skills: skills that appear both in the job requirements and are clearly evidenced in the candidate CV
       - missing_must_have: required "must-have" skills/experiences not evidenced in the candidate CV
-      - missing_nice_to_have: nice-to-have skills/experiences not evidenced in the candidate CV
 
     The output must organize results per job_id and follow a strict JSON structure:
     {
@@ -23,7 +22,6 @@ identify_gaps_task:
         "JOB_ID": {
           "matched_skills": ["skill1", "skill2"],
           "missing_must_have": ["req1", "req2"],
-          "missing_nice_to_have": ["req3", "req4"]
         }
       }
     }
