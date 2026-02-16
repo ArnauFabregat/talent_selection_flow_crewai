@@ -6,6 +6,7 @@ from crewai.project import CrewBase, agent, crew, task
 from src.constants import GUARDRAIL_MAX_RETRIES
 from src.llm.llm_config import openrouter_llm
 from src.talent_selection_flow.crews.classification_crew.guardrails import validate_classifier_output
+# from src.utils.callback import crewai_step_callback
 
 
 @CrewBase
@@ -48,5 +49,6 @@ class ClassificationCrew:
             name="Document classification crew",
             agents=[self.parser_agent()],
             tasks=[self.parse_task()],
+            # step_callback=crewai_step_callback,
             verbose=self._verbose,
         )
