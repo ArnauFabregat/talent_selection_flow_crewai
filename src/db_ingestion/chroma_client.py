@@ -116,6 +116,7 @@ def reshape_chroma_results(chroma_output: Dict[str, Any]) -> Dict[str, Any]:
     }
     }
     """
+    # TODO if chroma_output is empty return empty json
     # Dictionary comprehension; we take the first index [0] 
     # because you likely queried with a single CV.
     ids = chroma_output['ids'][0]

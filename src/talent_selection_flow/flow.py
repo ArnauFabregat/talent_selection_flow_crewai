@@ -146,7 +146,8 @@ class TalentSelectionFlow(Flow[TalentState]):
 
     @listen("route_other")
     def handle_other(self) -> None:
-     msg = f"Invalid document type: '{self.state.input_type}'. Expected '{DocumentType.CV}' or '{DocumentType.JOB}'"
+     msg = f"Invalid document type: '{self.state.input_type}'. Expected '{DocumentType.CV}' or '{DocumentType.JOB}'. " \
+            "Please, start new evaluation."
      logger.warning(msg)
      return msg
 
