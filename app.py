@@ -1,7 +1,6 @@
 import chainlit as cl
-from crewai import Agent, Task, Crew
 from src.talent_selection_flow.flow import TalentSelectionFlow
-from src.llm.llm_config import openrouter_llm
+from src.talent_selection_flow.crews.hr_consultant_crew.crew import HRConsultingCrew
 
 
 def get_actions():
@@ -103,35 +102,17 @@ async def handle_chat(message: cl.Message):
     # We slice the history to take only the last N items
     recent_history = history[-MAX_HISTORY_MESSAGES:]
     context_summary = "\n".join(recent_history)
-    print(context_summary)
-
-    # 3. Define the Agent with specific instructions
-    consultant = Agent(
-        role="Expert HR Consultant",
-        goal="Provide a continuous, helpful conversation based on the candidate report.",
-        backstory=(
-            "You are a professional HR partner. You are helpful, concise, and "
-            "you build upon the previous context of the conversation."
-        ),
-        llm=openrouter_llm
-    )
-
-    # 4. The Task: Feed the sliding window + new message
-    task = Task(
-        description=(
-            f"CANDIDATE REPORT:\n{report}\n\n"
-            f"RECENT CONVERSATION:\n{context_summary}\n\n"
-            f"NEW USER QUESTION: {message.content}"
-        ),
-        expected_output="A professional, contextual response based on the report and previous history.",
-        agent=consultant
-    )
 
     async with cl.Step(name="HR Consultant Flow", type="llm") as step:
         step.input = "⚙️ Orchestrating agents for evaluation..."
-        res = await cl.make_async(Crew(agents=[consultant], tasks=[task]).kickoff)()
-        
-        # 5. Update history: Add current turn and save back to session
+        crew = HRConsultingCrew(verbose=False)
+        res = await cl.make_async(crew.crew().kickoff)(inputs={
+            "report": report,
+            "context_summary": context_summary,
+            "message": message.content,
+        })
+
+        # 3. Update history: Add current turn and save back to session
         history.append(f"User: {message.content}")
         history.append(f"Consultant: {res.raw}")
         cl.user_session.set("chat_history", history)
