@@ -6,7 +6,7 @@ from crewai.project import CrewBase, agent, crew, task
 from src.constants import GUARDRAIL_MAX_RETRIES
 from src.llm.llm_config import openrouter_llm
 from src.talent_selection_flow.crews.cv_to_job_crew.schemas import GapAnalysisOutput, InterviewQuestionsOutput
-from src.talent_selection_flow.crews.cv_to_job_crew.guardrails import (
+from src.talent_selection_flow.crews.guardrails import (
     validate_gapanalysisoutput_schema,
     validate_interviewquestionsoutput_schema,
 )
@@ -15,7 +15,7 @@ from src.talent_selection_flow.crews.cv_to_job_crew.guardrails import (
 @CrewBase
 class CVToJobCrew:
     """
-    CV → Related Jobs → Gaps → Interview Questions → Final Report
+    CV → Related Jobs → Gaps → Interview Questions
     YAML-first configuration:
       - config/agents.yaml
       - config/tasks.yaml
@@ -24,9 +24,10 @@ class CVToJobCrew:
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
 
-    def __init__(self,
-                 guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
-                 verbose: bool = False,
+    def __init__(
+        self,
+        guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
+        verbose: bool = False,
     ) -> None:
         self._guardrail_max_retries = guardrail_max_retries
         self._verbose = verbose

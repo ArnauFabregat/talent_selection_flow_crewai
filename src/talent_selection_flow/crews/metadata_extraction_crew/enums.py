@@ -9,6 +9,7 @@ class EducationLevel(StrEnum):
     OTHER = "other"
     UNKNOWN = "unknown"
 
+
 class ExperienceLevel(StrEnum):
     INTERN = "intern"
     ENTRY = "entry"
@@ -16,6 +17,7 @@ class ExperienceLevel(StrEnum):
     SENIOR = "senior"
     OTHER = "other"
     UNKNOWN = "unknown"
+
 
 class EmploymentType(StrEnum):
     FULL_TIME = "full-time"

@@ -17,7 +17,7 @@ def validate_classifier_output(result: TaskOutput) -> Tuple[bool, Any]:
 
     # 2. Validate enums
     if result_str not in DocumentType._value2member_map_:
-        logger.warning(f"Guardrail `validate_classifier_output` triggered: invalid output field")
+        logger.warning("Guardrail `validate_classifier_output` triggered: invalid output field")
         return (False, f"Invalid field. Output must be one of {'/'.join(DocumentType)}")
 
     return (True, result_str)

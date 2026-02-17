@@ -35,39 +35,35 @@ def disable_dependency_loggers(dependencies: List[str]) -> None:
 
 
 def setup_logger(debug: Optional[bool] = None) -> None:
-    """
-    Configure Loguru according to `debug`.
-
-    Args
-    ----
-    debug: bool | None
-        - True  -> enable DEBUG logs to stdout.
-        - False -> hide DEBUG (stdout shows INFO; stderr shows WARNING+).
-    """
     logger.remove()
 
-    if debug:
-        # Show DEBUG and INFO to stdout
-        logger.add(
-            sys.stdout,
-            format=LOG_FORMAT,
-            level="DEBUG",
-            filter=lambda r: r["level"].no < logger.level("WARNING").no,
-        )
-    else:
-        # Hide DEBUG -> start at INFO on stdout
-        logger.add(
-            sys.stdout,
-            format=LOG_FORMAT,
-            level="INFO",
-            filter=lambda r: r["level"].no < logger.level("WARNING").no,
-        )
+    # Determine the "Floor" level (DEBUG or INFO)
+    base_level = "DEBUG" if debug else "INFO"
 
-    # Always send WARNING and above to stderr
+    # 1. Console: Standard Output (DEBUG/INFO)
+    logger.add(
+        sys.stdout,
+        format=LOG_FORMAT,
+        level=base_level,
+        filter=lambda r: r["level"].no < 30,  # Stop before WARNING
+    )
+
+    # 2. Console: Standard Error (WARNING+)
     logger.add(
         sys.stderr,
         format="\n" + LOG_FORMAT,
         level="WARNING",
+    )
+
+    # 3. File: Persistent storage (Matches base_level)
+    logger.add(
+        "data/logs/app.log",  # "app_{time:YYYY-MM-DD}.log",
+        format=LOG_FORMAT,
+        level=base_level,  # <--- Now it respects the debug toggle!
+        rotation="10 MB",
+        retention="10 days",
+        compression="zip",
+        enqueue=True
     )
 
 

@@ -3,7 +3,9 @@ from typing import Any, Tuple, List
 from crewai import TaskOutput
 from pycountry import countries
 
-from src.db_ingestion.metadata_extraction_crew.enums import ExperienceLevel, EducationLevel, EmploymentType
+from src.talent_selection_flow.crews.metadata_extraction_crew.enums import (
+    ExperienceLevel, EducationLevel, EmploymentType,
+)
 from src.utils.logger import logger
 
 
@@ -33,7 +35,7 @@ def validate_cvmetadata_schema(result: TaskOutput) -> Tuple[bool, Any]:
     if data.get("country"):
         if countries.get(alpha_2=data.get("country")) is None:
             fields.append("country")
-            errors.append("country must be in ISO Alpha-2 code")
+            errors.append(f"`{data.get('country')}` is not valid. Must be a country and in ISO Alpha-2 code")
 
     # 4. Return
     if errors:

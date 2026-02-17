@@ -1,5 +1,5 @@
-from crewai.flow.flow import Flow, listen, router, start, or_
-from typing import Any, Dict
+from crewai.flow.flow import Flow, listen, router, start
+from typing import Any
 import json
 from pathlib import Path
 
@@ -7,16 +7,19 @@ from src.config.paths import REPORT_OUTPUT_PATH
 from src.constants import GUARDRAIL_MAX_RETRIES
 from src.utils.logger import logger
 
-from src.db_ingestion.metadata_extraction_crew.crews import CVMetadataExtractorCrew, JobMetadataExtractorCrew
-from src.db_ingestion.metadata_extraction_crew.enums import ExperienceLevel, EducationLevel, EmploymentType
 from src.db_ingestion.chroma_client import query_to_collection
-
-from src.talent_selection_flow.crews.classification_crew.enums import DocumentType
 from src.talent_selection_flow.schemas import TalentState
+from src.talent_selection_flow.crews.utils import render_to_markdown
+from src.talent_selection_flow.crews.metadata_extraction_crew.crews import (
+    CVMetadataExtractorCrew, JobMetadataExtractorCrew,
+)
+from src.talent_selection_flow.crews.metadata_extraction_crew.enums import (
+    ExperienceLevel, EducationLevel, EmploymentType,
+)
+from src.talent_selection_flow.crews.classification_crew.enums import DocumentType
 from src.talent_selection_flow.crews.classification_crew.crew import ClassificationCrew
 from src.talent_selection_flow.crews.cv_to_job_crew.crew import CVToJobCrew
-from src.talent_selection_flow.crews.cv_to_job_crew.utils import render_to_markdown
-# from src.talent_selection_flow.crews.job_to_cv_crew.crew import JobToCVCrew
+from src.talent_selection_flow.crews.job_to_cv_crew.crew import JobToCVCrew
 
 
 class TalentSelectionFlow(Flow[TalentState]):
@@ -24,10 +27,11 @@ class TalentSelectionFlow(Flow[TalentState]):
     Docstring for TalentSelectionFlow
     """
 
-    def __init__(self,
-                 guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
-                 verbose: bool = False
-    ):
+    def __init__(
+        self,
+        guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
+        verbose: bool = False,
+    ) -> None:
         super().__init__()
         self._guardrail_max_retries = guardrail_max_retries
         self._verbose = verbose
@@ -36,7 +40,7 @@ class TalentSelectionFlow(Flow[TalentState]):
         Path(REPORT_OUTPUT_PATH).parent.mkdir(parents=True, exist_ok=True)
 
     @start()
-    def classify_input(self) -> str:
+    def classify_input(self) -> None:
         result = ClassificationCrew(
             verbose=self._verbose,
             guardrail_max_retries=self._guardrail_max_retries,
@@ -88,8 +92,9 @@ class TalentSelectionFlow(Flow[TalentState]):
 
         # Markdown Report generation
         report = render_to_markdown(
+            process_type="cv",
             metadata_dict=metadata_dict,
-            related_jobs=related_jobs,
+            related_docs=related_jobs,
             gap_analysis_output=cv_crew.identify_gaps_task().output.json_dict,
             inverview_questions_output=cv_crew.generate_interview_questions_task().output.json_dict,
         )
@@ -97,19 +102,60 @@ class TalentSelectionFlow(Flow[TalentState]):
         # Write the file
         REPORT_OUTPUT_PATH.write_text(report, encoding="utf-8")
         self.state.output = report
+        return report
 
     @listen("route_job")
     def process_job(self) -> Any:
-        logger.warning("`JobToCVCrew` not implemented yet.")
-        self.state.output = "`JobToCVCrew` not implemented yet."
-        # return JobToCVCrew().crew().kickoff(
-        #     inputs={"content": self.state.raw_input}
-        # )
+        # Extract job metadata
+        metadata = JobMetadataExtractorCrew(
+            guardrail_max_retries=self._guardrail_max_retries,
+            verbose=self._verbose,
+            human_input=False,
+        ).crew().kickoff(inputs={
+            "content": self.state.raw_input,
+            "employmenttype_options": "/".join(EmploymentType),
+            "experiencelevel_options": "/".join(ExperienceLevel),
+        })
+        metadata_dict = json.loads(metadata.raw)
+
+        # Get matches from jobs collection
+        related_cvs = query_to_collection(
+            collection_name="cvs",
+            query_text=self.state.raw_input,
+            country=metadata_dict.get("country"),
+            top_k=3,
+        )
+
+        # Send info to JobToCVCrew
+        job_crew = JobToCVCrew(
+            verbose=self._verbose,
+            guardrail_max_retries=self._guardrail_max_retries,
+        )
+        _ = job_crew.crew().kickoff(
+            inputs={"structured_job": metadata_dict,
+                    "related_cvs": related_cvs}
+        )
+
+        # Markdown Report generation
+        report = render_to_markdown(
+            process_type="job",
+            metadata_dict=metadata_dict,
+            related_docs=related_cvs,
+            gap_analysis_output=job_crew.identify_gaps_task().output.json_dict,
+            inverview_questions_output=job_crew.generate_interview_questions_task().output.json_dict,
+        )
+
+        # Write the file
+        REPORT_OUTPUT_PATH.write_text(report, encoding="utf-8")
+        self.state.output = report
+        return report
 
     @listen("route_other")
     def handle_other(self) -> None:
-     logger.warning(f"Invalid document type: '{self.state.input_type}'. Expected '{DocumentType.CV}' or '{DocumentType.JOB}'")
-     self.state.output = f"Invalid document type: '{self.state.input_type}'. Expected '{DocumentType.CV}' or '{DocumentType.JOB}'"
+        msg = f"Invalid document type. Expected '{DocumentType.CV}' or '{DocumentType.JOB}'. " \
+            "Please, start a new evaluation."
+        logger.warning(msg)
+        return msg
 
 # def kickoff() -> None:
 #     flow = TalentSelectionFlow()
