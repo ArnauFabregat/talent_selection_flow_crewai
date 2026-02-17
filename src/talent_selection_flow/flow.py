@@ -7,15 +7,14 @@ from src.config.paths import REPORT_OUTPUT_PATH
 from src.constants import GUARDRAIL_MAX_RETRIES
 from src.utils.logger import logger
 
-from src.db_ingestion.metadata_extraction_crew.crews import CVMetadataExtractorCrew, JobMetadataExtractorCrew
-from src.db_ingestion.metadata_extraction_crew.enums import ExperienceLevel, EducationLevel, EmploymentType
 from src.db_ingestion.chroma_client import query_to_collection
-
-from src.talent_selection_flow.crews.classification_crew.enums import DocumentType
 from src.talent_selection_flow.schemas import TalentState
+from src.talent_selection_flow.crews.utils import render_to_markdown
+from src.talent_selection_flow.crews.metadata_extraction_crew.crews import CVMetadataExtractorCrew, JobMetadataExtractorCrew
+from src.talent_selection_flow.crews.metadata_extraction_crew.enums import ExperienceLevel, EducationLevel, EmploymentType
+from src.talent_selection_flow.crews.classification_crew.enums import DocumentType
 from src.talent_selection_flow.crews.classification_crew.crew import ClassificationCrew
 from src.talent_selection_flow.crews.cv_to_job_crew.crew import CVToJobCrew
-from src.talent_selection_flow.crews.cv_to_job_crew.utils import render_to_markdown
 from src.talent_selection_flow.crews.job_to_cv_crew.crew import JobToCVCrew
 
 
@@ -88,6 +87,7 @@ class TalentSelectionFlow(Flow[TalentState]):
 
         # Markdown Report generation
         report = render_to_markdown(
+            process_type="cv",
             metadata_dict=metadata_dict,
             related_docs=related_jobs,
             gap_analysis_output=cv_crew.identify_gaps_task().output.json_dict,
@@ -133,6 +133,7 @@ class TalentSelectionFlow(Flow[TalentState]):
 
         # Markdown Report generation
         report = render_to_markdown(
+            process_type="job",
             metadata_dict=metadata_dict,
             related_docs=related_cvs,
             gap_analysis_output=job_crew.identify_gaps_task().output.json_dict,

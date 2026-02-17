@@ -4,8 +4,8 @@ from crewai.project import CrewBase, agent, crew, task
 
 from src.constants import GUARDRAIL_MAX_RETRIES
 from src.llm.llm_config import openrouter_llm
-from src.db_ingestion.metadata_extraction_crew.schemas import CVMetadata, JobMetadata
-from src.db_ingestion.metadata_extraction_crew.guardrails import (
+from src.talent_selection_flow.crews.metadata_extraction_crew.schemas import CVMetadata, JobMetadata
+from src.talent_selection_flow.crews.metadata_extraction_crew.guardrails import (
     validate_cvmetadata_schema,
     validate_jobmetadata_schema,
 )

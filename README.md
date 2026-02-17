@@ -157,7 +157,6 @@ TBD
 - Add documentation in README
 - Add docstrings
 - Add unit tests
-- Refactor: move extractors to talent_flow and read from there for ingestion
 - Add max_iter and max_rpm to control rate limits in agents
 - Enhance HR Consultant agent or refactor to call from src
 - Add pdf mapper if pdf input
