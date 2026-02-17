@@ -45,7 +45,7 @@ def setup_logger(debug: Optional[bool] = None) -> None:
         sys.stdout,
         format=LOG_FORMAT,
         level=base_level,
-        filter=lambda r: r["level"].no < 30, # Stop before WARNING
+        filter=lambda r: r["level"].no < 30,  # Stop before WARNING
     )
 
     # 2. Console: Standard Error (WARNING+)

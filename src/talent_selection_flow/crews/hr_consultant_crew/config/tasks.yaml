@@ -1,0 +1,8 @@
+# YAML-first task definitions
+consulting_task:
+  description: >
+    CANDIDATE REPORT: {report}
+    RECENT CONVERSATION: {context_summary}
+    NEW USER MESSAGE: {message}
+  expected_output: >
+    A professional, contextual response to user question based on the report and previous history.

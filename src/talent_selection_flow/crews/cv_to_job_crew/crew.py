@@ -24,9 +24,10 @@ class CVToJobCrew:
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
 
-    def __init__(self,
-                 guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
-                 verbose: bool = False,
+    def __init__(
+        self,
+        guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
+        verbose: bool = False,
     ) -> None:
         self._guardrail_max_retries = guardrail_max_retries
         self._verbose = verbose

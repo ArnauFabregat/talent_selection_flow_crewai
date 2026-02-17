@@ -35,7 +35,7 @@ def validate_gapanalysisoutput_schema(result: TaskOutput) -> Tuple[bool, Any]:
 
     # 3. Return
     if errors:
-        logger.warning(f"Guardrail `validate_gapanalysisoutput_schema` triggered: invalid doc entries.")
+        logger.warning("Guardrail `validate_gapanalysisoutput_schema` triggered: invalid doc entries.")
         feedback: str = "Guardrail `validate_gapanalysisoutput_schema` validation failed:\n- " + "\n- ".join(errors)
         logger.debug(feedback)
         return (False, feedback)
@@ -72,8 +72,9 @@ def validate_interviewquestionsoutput_schema(result: TaskOutput) -> Tuple[bool, 
 
     # 3. Return
     if errors:
-        logger.warning(f"Guardrail `validate_interviewquestionsoutput_schema` triggered: invalid doc entries.")
-        feedback: str = "Guardrail `validate_interviewquestionsoutput_schema` validation failed:\n- " + "\n- ".join(errors)
+        logger.warning("Guardrail `validate_interviewquestionsoutput_schema` triggered: invalid doc entries.")
+        feedback: str = "Guardrail `validate_interviewquestionsoutput_schema` " \
+                        "validation failed:\n- " + "\n- ".join(errors)
         logger.debug(feedback)
         return (False, feedback)
 
