@@ -1,4 +1,5 @@
 from datetime import datetime
+from src.talent_selection_flow.crews.classification_crew.enums import DocumentType
 
 
 def render_to_markdown(
@@ -8,7 +9,7 @@ def render_to_markdown(
         gap_analysis_output: dict,
         inverview_questions_output: dict,
 ) -> str:
-    if process_type == "job":
+    if process_type == DocumentType.JOB:
         report = [
             "# Recruitment Analysis Report",
             f"*Date: {datetime.today().strftime('%Y-%m-%d')}*",
@@ -61,7 +62,7 @@ def render_to_markdown(
                     report.append(f"\n\t → Question: {i["question"]}")
                     report.append(f"\n\t ✓ Response: {i["response"]}")
 
-    elif process_type == "cv":
+    elif process_type == DocumentType.CV:
         report = [
             "# Recruitment Analysis Report",
             f"*Date: {datetime.today().strftime('%Y-%m-%d')}*",

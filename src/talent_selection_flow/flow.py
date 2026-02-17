@@ -1,4 +1,4 @@
-from crewai.flow.flow import Flow, listen, router, start
+from crewai.flow.flow import Flow, listen, router, start, or_
 from typing import Any
 import json
 from pathlib import Path
@@ -51,103 +51,100 @@ class TalentSelectionFlow(Flow[TalentState]):
         self.state.input_type = result.raw
 
     @router(classify_input)
-    def route_by_type(self) -> str:
+    def route_by_type_1(self) -> str:
+        if (self.state.input_type == DocumentType.CV) or (self.state.input_type == DocumentType.JOB):
+            return "cv_or_job"
+        else:
+            return "route_other"
+
+    @listen("cv_or_job")
+    def extract_metadata(self) -> Any:
         if self.state.input_type == DocumentType.CV:
-            return "route_cv"
-        elif self.state.input_type == DocumentType.JOB:
-            return "route_job"
-        return "route_other"
+            # Extract cv metadata
+            metadata = CVMetadataExtractorCrew(
+                guardrail_max_retries=self._guardrail_max_retries,
+                verbose=self._verbose,
+                human_input=False,
+            ).crew().kickoff(inputs={
+                "content": self.state.raw_input,
+                "educationlevel_options": "/".join(EducationLevel),
+                "experiencelevel_options": "/".join(ExperienceLevel),
+            })
+        else:
+            # Extract job metadata
+            metadata = JobMetadataExtractorCrew(
+                guardrail_max_retries=self._guardrail_max_retries,
+                verbose=self._verbose,
+                human_input=False,
+            ).crew().kickoff(inputs={
+                "content": self.state.raw_input,
+                "employmenttype_options": "/".join(EmploymentType),
+                "experiencelevel_options": "/".join(ExperienceLevel),
+            })
+        self.state.metadata = json.loads(metadata.raw)
 
-    @listen("route_cv")
-    def process_cv(self) -> Any:
-        # Extract cv metadata
-        metadata = CVMetadataExtractorCrew(
-            guardrail_max_retries=self._guardrail_max_retries,
-            verbose=self._verbose,
-            human_input=False,
-        ).crew().kickoff(inputs={
-            "content": self.state.raw_input,
-            "educationlevel_options": "/".join(EducationLevel),
-            "experiencelevel_options": "/".join(ExperienceLevel),
-        })
-        metadata_dict = json.loads(metadata.raw)
+    @listen(extract_metadata)
+    def query_to_db(self) -> Any:
+        if self.state.input_type == DocumentType.CV:
+            collection_name = "jobs"
+        else:
+            collection_name = "cvs"
 
-        # Get matches from jobs collection
-        related_jobs = query_to_collection(
-            collection_name="jobs",
+        # Get matches from collection
+        related_docs = query_to_collection(
+            collection_name=collection_name,
             query_text=self.state.raw_input,
-            country=metadata_dict.get("country"),
+            country=self.state.metadata.get("country"),
             top_k=3,
         )
+        self.state.related_docs = related_docs
 
+    @router(query_to_db)
+    def route_by_type_2(self) -> str:
+        if self.state.input_type == DocumentType.CV:
+            return "route_cv"
+        else:
+            return "route_job"
+
+    @listen("route_cv")
+    def process_cv(self) -> None:
         # Send info to CVToJobCrew
         cv_crew = CVToJobCrew(
             verbose=self._verbose,
             guardrail_max_retries=self._guardrail_max_retries,
         )
         _ = cv_crew.crew().kickoff(
-            inputs={"structured_cv": metadata_dict,
-                    "related_jobs": related_jobs}
+            inputs={"structured_cv": self.state.metadata,
+                    "related_jobs": self.state.related_docs}
         )
-
-        # Markdown Report generation
-        report = render_to_markdown(
-            process_type="cv",
-            metadata_dict=metadata_dict,
-            related_docs=related_jobs,
-            gap_analysis_output=cv_crew.identify_gaps_task().output.json_dict,
-            inverview_questions_output=cv_crew.generate_interview_questions_task().output.json_dict,
-        )
-
-        # Write the file
-        REPORT_OUTPUT_PATH.write_text(report, encoding="utf-8")
-        self.state.output = report
-        return report
+        self.state.process_crew = cv_crew
 
     @listen("route_job")
-    def process_job(self) -> Any:
-        # Extract job metadata
-        metadata = JobMetadataExtractorCrew(
-            guardrail_max_retries=self._guardrail_max_retries,
-            verbose=self._verbose,
-            human_input=False,
-        ).crew().kickoff(inputs={
-            "content": self.state.raw_input,
-            "employmenttype_options": "/".join(EmploymentType),
-            "experiencelevel_options": "/".join(ExperienceLevel),
-        })
-        metadata_dict = json.loads(metadata.raw)
-
-        # Get matches from jobs collection
-        related_cvs = query_to_collection(
-            collection_name="cvs",
-            query_text=self.state.raw_input,
-            country=metadata_dict.get("country"),
-            top_k=3,
-        )
-
+    def process_job(self) -> None:
         # Send info to JobToCVCrew
         job_crew = JobToCVCrew(
             verbose=self._verbose,
             guardrail_max_retries=self._guardrail_max_retries,
         )
         _ = job_crew.crew().kickoff(
-            inputs={"structured_job": metadata_dict,
-                    "related_cvs": related_cvs}
+            inputs={"structured_job": self.state.metadata,
+                    "related_cvs": self.state.related_docs}
         )
+        self.state.process_crew = job_crew
 
+    @listen(or_(process_cv, process_job))
+    def render_and_export_report(self) -> str:
         # Markdown Report generation
         report = render_to_markdown(
-            process_type="job",
-            metadata_dict=metadata_dict,
-            related_docs=related_cvs,
-            gap_analysis_output=job_crew.identify_gaps_task().output.json_dict,
-            inverview_questions_output=job_crew.generate_interview_questions_task().output.json_dict,
+            process_type=self.state.input_type,
+            metadata_dict=self.state.metadata,
+            related_docs=self.state.related_docs,
+            gap_analysis_output=self.state.process_crew.identify_gaps_task().output.json_dict,
+            inverview_questions_output=self.state.process_crew.generate_interview_questions_task().output.json_dict,
         )
 
         # Write the file
         REPORT_OUTPUT_PATH.write_text(report, encoding="utf-8")
-        self.state.output = report
         return report
 
     @listen("route_other")
