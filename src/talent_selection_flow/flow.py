@@ -1,4 +1,4 @@
-from crewai.flow.flow import Flow, listen, router, start, or_
+from crewai.flow.flow import Flow, listen, router, start
 from typing import Any
 import json
 from pathlib import Path
@@ -10,8 +10,12 @@ from src.utils.logger import logger
 from src.db_ingestion.chroma_client import query_to_collection
 from src.talent_selection_flow.schemas import TalentState
 from src.talent_selection_flow.crews.utils import render_to_markdown
-from src.talent_selection_flow.crews.metadata_extraction_crew.crews import CVMetadataExtractorCrew, JobMetadataExtractorCrew
-from src.talent_selection_flow.crews.metadata_extraction_crew.enums import ExperienceLevel, EducationLevel, EmploymentType
+from src.talent_selection_flow.crews.metadata_extraction_crew.crews import (
+    CVMetadataExtractorCrew, JobMetadataExtractorCrew,
+)
+from src.talent_selection_flow.crews.metadata_extraction_crew.enums import (
+    ExperienceLevel, EducationLevel, EmploymentType,
+)
 from src.talent_selection_flow.crews.classification_crew.enums import DocumentType
 from src.talent_selection_flow.crews.classification_crew.crew import ClassificationCrew
 from src.talent_selection_flow.crews.cv_to_job_crew.crew import CVToJobCrew
@@ -23,10 +27,11 @@ class TalentSelectionFlow(Flow[TalentState]):
     Docstring for TalentSelectionFlow
     """
 
-    def __init__(self,
-                 guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
-                 verbose: bool = False
-    ):
+    def __init__(
+        self,
+        guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
+        verbose: bool = False,
+    ) -> None:
         super().__init__()
         self._guardrail_max_retries = guardrail_max_retries
         self._verbose = verbose
@@ -35,7 +40,7 @@ class TalentSelectionFlow(Flow[TalentState]):
         Path(REPORT_OUTPUT_PATH).parent.mkdir(parents=True, exist_ok=True)
 
     @start()
-    def classify_input(self) -> str:
+    def classify_input(self) -> None:
         result = ClassificationCrew(
             verbose=self._verbose,
             guardrail_max_retries=self._guardrail_max_retries,
@@ -147,10 +152,10 @@ class TalentSelectionFlow(Flow[TalentState]):
 
     @listen("route_other")
     def handle_other(self) -> None:
-     msg = f"Invalid document type. Expected '{DocumentType.CV}' or '{DocumentType.JOB}'. " \
+        msg = f"Invalid document type. Expected '{DocumentType.CV}' or '{DocumentType.JOB}'. " \
             "Please, start a new evaluation."
-     logger.warning(msg)
-     return msg
+        logger.warning(msg)
+        return msg
 
 # def kickoff() -> None:
 #     flow = TalentSelectionFlow()

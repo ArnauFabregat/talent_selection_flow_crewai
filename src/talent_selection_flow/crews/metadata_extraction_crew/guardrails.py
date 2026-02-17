@@ -3,7 +3,9 @@ from typing import Any, Tuple, List
 from crewai import TaskOutput
 from pycountry import countries
 
-from src.talent_selection_flow.crews.metadata_extraction_crew.enums import ExperienceLevel, EducationLevel, EmploymentType
+from src.talent_selection_flow.crews.metadata_extraction_crew.enums import (
+    ExperienceLevel, EducationLevel, EmploymentType,
+)
 from src.utils.logger import logger
 
 

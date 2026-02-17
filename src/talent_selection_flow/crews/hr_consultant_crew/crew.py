@@ -15,9 +15,10 @@ class HRConsultingCrew:
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
 
-    def __init__(self,
-                 verbose: bool = False
-    ):
+    def __init__(
+        self,
+        verbose: bool = False,
+    ) -> None:
         self._verbose = verbose
 
     @agent

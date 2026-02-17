@@ -19,11 +19,12 @@ class CVMetadataExtractorCrew:
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
 
-    def __init__(self,
-                 guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
-                 human_input: bool = False,
-                 verbose: bool = False,
-    ):
+    def __init__(
+        self,
+        guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
+        human_input: bool = False,
+        verbose: bool = False,
+    ) -> None:
         self._guardrail_max_retries = guardrail_max_retries
         self._human_input = human_input
         self._verbose = verbose
@@ -64,11 +65,12 @@ class JobMetadataExtractorCrew:
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
 
-    def __init__(self,
-                 guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
-                 human_input: bool = False,
-                 verbose: bool = False
-    ):
+    def __init__(
+        self,
+        guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
+        human_input: bool = False,
+        verbose: bool = False
+    ) -> None:
         self._guardrail_max_retries = guardrail_max_retries
         self._human_input = human_input
         self._verbose = verbose
