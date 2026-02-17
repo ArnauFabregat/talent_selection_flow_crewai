@@ -97,6 +97,7 @@ class TalentSelectionFlow(Flow[TalentState]):
         # Write the file
         REPORT_OUTPUT_PATH.write_text(report, encoding="utf-8")
         self.state.output = report
+        return report
 
     @listen("route_job")
     def process_job(self) -> Any:
@@ -141,11 +142,14 @@ class TalentSelectionFlow(Flow[TalentState]):
         # Write the file
         REPORT_OUTPUT_PATH.write_text(report, encoding="utf-8")
         self.state.output = report
+        return report
 
     @listen("route_other")
     def handle_other(self) -> None:
-     logger.warning(f"Invalid document type: '{self.state.input_type}'. Expected '{DocumentType.CV}' or '{DocumentType.JOB}'")
-     self.state.output = f"Invalid document type: '{self.state.input_type}'. Expected '{DocumentType.CV}' or '{DocumentType.JOB}'"
+     msg = f"Invalid document type: '{self.state.input_type}'. Expected '{DocumentType.CV}' or '{DocumentType.JOB}'. " \
+            "Please, start new evaluation."
+     logger.warning(msg)
+     return msg
 
 # def kickoff() -> None:
 #     flow = TalentSelectionFlow()
