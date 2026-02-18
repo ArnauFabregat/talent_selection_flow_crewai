@@ -47,7 +47,7 @@ async def run_talent_flow() -> None:
     # Visual Orchestration
     async with cl.Step(name="Talent Selection Flow", type="run") as step:
         step.input = "⚙️ Orchestrating agents for evaluation..."
-        flow = TalentSelectionFlow(verbose=False)
+        flow = TalentSelectionFlow(verbose=True)
         result = await cl.make_async(flow.kickoff)(inputs={"raw_input": input_doc})
         step.output = f"**Evaluation complete for** *{file_name}*:\n{input_doc}"
 
@@ -117,7 +117,7 @@ async def handle_chat(message: cl.Message) -> None:
 
     async with cl.Step(name="HR Consultant Flow", type="llm") as step:
         step.input = "⚙️ Orchestrating agents for evaluation..."
-        crew = HRConsultingCrew(verbose=False)
+        crew = HRConsultingCrew(verbose=True)
         res = await cl.make_async(crew.crew().kickoff)(inputs={
             "report": report,
             "context_summary": context_summary,
