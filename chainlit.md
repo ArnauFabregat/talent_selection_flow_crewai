@@ -30,7 +30,6 @@ Welcome to the **Talent Scout Assistant**. This platform utilizes a specialized 
 
 * **For a New Candidate:** Always click the **"New Chat"** button in the top-left sidebar. This ensures a 100% clean state for the document parser and agent memory.
 * **Download:** Use the **📥 Download Recruitment Analysis Report** button to save the initial evaluation before starting a long Q&A session.
-* For now, please use the **Paste Text** option. **Upload PDF** is not implemented yet.
 
 ---
 *Powered by CrewAI & OpenRouter*
