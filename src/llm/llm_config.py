@@ -1,6 +1,7 @@
 import os
-from dotenv import load_dotenv
+
 from crewai import LLM
+from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()

@@ -4,11 +4,11 @@ from crewai.project import CrewBase, agent, crew, task
 
 from src.constants import GUARDRAIL_MAX_RETRIES
 from src.llm.llm_config import openrouter_llm
-from src.talent_selection_flow.crews.metadata_extraction_crew.schemas import CVMetadata, JobMetadata
 from src.talent_selection_flow.crews.metadata_extraction_crew.guardrails import (
     validate_cvmetadata_schema,
     validate_jobmetadata_schema,
 )
+from src.talent_selection_flow.crews.metadata_extraction_crew.schemas import CVMetadata, JobMetadata
 
 
 @CrewBase
@@ -16,6 +16,7 @@ class CVMetadataExtractorCrew:
     """
     Agent extracts metadata from CVs
     """
+
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
 
@@ -62,14 +63,12 @@ class JobMetadataExtractorCrew:
     """
     Agent extracts metadata from job descriptions
     """
+
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
 
     def __init__(
-        self,
-        guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES,
-        human_input: bool = False,
-        verbose: bool = False
+        self, guardrail_max_retries: int = GUARDRAIL_MAX_RETRIES, human_input: bool = False, verbose: bool = False
     ) -> None:
         self._guardrail_max_retries = guardrail_max_retries
         self._human_input = human_input

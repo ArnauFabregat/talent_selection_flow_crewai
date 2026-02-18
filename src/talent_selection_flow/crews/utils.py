@@ -1,13 +1,14 @@
 from datetime import datetime
+
 from src.talent_selection_flow.crews.classification_crew.enums import DocumentType
 
 
 def render_to_markdown(
-        process_type: str,
-        metadata_dict: dict,
-        related_docs: dict,
-        gap_analysis_output: dict,
-        inverview_questions_output: dict,
+    process_type: str,
+    metadata_dict: dict,
+    related_docs: dict,
+    gap_analysis_output: dict,
+    inverview_questions_output: dict,
 ) -> str:
     if process_type == DocumentType.JOB:
         report = [
@@ -22,7 +23,7 @@ def render_to_markdown(
         ]
         # Add candidate info
         for k, v in metadata_dict.items():
-            report.append(f"- **{k.replace("_", " ").capitalize()}**: {v}")
+            report.append(f"- **{k.replace('_', ' ').capitalize()}**: {v}")
 
         # Add matched cvs summary
         report.append("## Matched cvs summary")
@@ -34,7 +35,7 @@ def render_to_markdown(
         for k, v in related_docs.items():
             report.append(f"### {v['title']} (ID: {k})")
             for k2, v2 in v.items():
-                report.append(f"- **{k2.replace("_", " ").capitalize()}**: {v2}")
+                report.append(f"- **{k2.replace('_', ' ').capitalize()}**: {v2}")
 
         # Add gaps analysis
         report.append("## Gaps analysis")
@@ -42,10 +43,10 @@ def render_to_markdown(
             "*An objective technical audit identifying the delta between the candidate's current skillset and the job's "
             "mandatory requirements.*"
         )
-        for k, v in gap_analysis_output['docs'].items():
+        for k, v in gap_analysis_output["docs"].items():
             report.append(f"### CV ID: {k}")
             for k2, v2 in v.items():
-                report.append(f"- **{k2.replace("_", " ").capitalize()}**: {', '.join(v2)}")
+                report.append(f"- **{k2.replace('_', ' ').capitalize()}**: {', '.join(v2)}")
 
         # Add interview questions
         report.append("## Interview questions")
@@ -54,13 +55,13 @@ def render_to_markdown(
             "strengths, probe the specific gaps identified in the previous section, and assess the candidate's "
             "seniority through behavioral scenarios.*"
         )
-        for k, v in inverview_questions_output['docs'].items():
+        for k, v in inverview_questions_output["docs"].items():
             report.append(f"### CV ID: {k}")
             for k2, v2 in v.items():
-                report.append(f"- **{k2.replace("_", " ").capitalize()}**:")
+                report.append(f"- **{k2.replace('_', ' ').capitalize()}**:")
                 for i in v2:
-                    report.append(f"\n\t → Question: {i["question"]}")
-                    report.append(f"\n\t ✓ Response: {i["response"]}")
+                    report.append(f"\n\t → Question: {i['question']}")
+                    report.append(f"\n\t ✓ Response: {i['response']}")
 
     elif process_type == DocumentType.CV:
         report = [
@@ -75,7 +76,7 @@ def render_to_markdown(
         ]
         # Add candidate info
         for k, v in metadata_dict.items():
-            report.append(f"- **{k.replace("_", " ").capitalize()}**: {v}")
+            report.append(f"- **{k.replace('_', ' ').capitalize()}**: {v}")
 
         # Add matched jobs summary
         report.append("## Matched jobs summary")
@@ -87,7 +88,7 @@ def render_to_markdown(
         for k, v in related_docs.items():
             report.append(f"### {v['title']} (ID: {k})")
             for k2, v2 in v.items():
-                report.append(f"- **{k2.replace("_", " ").capitalize()}**: {v2}")
+                report.append(f"- **{k2.replace('_', ' ').capitalize()}**: {v2}")
 
         # Add gaps analysis
         report.append("## Gaps analysis")
@@ -95,10 +96,10 @@ def render_to_markdown(
             "*An objective technical audit identifying the delta between the candidate's current skillset and the job's "
             "mandatory requirements.*"
         )
-        for k, v in gap_analysis_output['docs'].items():
+        for k, v in gap_analysis_output["docs"].items():
             report.append(f"### Job ID: {k}")
             for k2, v2 in v.items():
-                report.append(f"- **{k2.replace("_", " ").capitalize()}**: {', '.join(v2)}")
+                report.append(f"- **{k2.replace('_', ' ').capitalize()}**: {', '.join(v2)}")
 
         # Add interview questions
         report.append("## Interview questions")
@@ -107,13 +108,13 @@ def render_to_markdown(
             "strengths, probe the specific gaps identified in the previous section, and assess the candidate's "
             "seniority through behavioral scenarios.*"
         )
-        for k, v in inverview_questions_output['docs'].items():
+        for k, v in inverview_questions_output["docs"].items():
             report.append(f"### Job ID: {k}")
             for k2, v2 in v.items():
-                report.append(f"- **{k2.replace("_", " ").capitalize()}**:")
+                report.append(f"- **{k2.replace('_', ' ').capitalize()}**:")
                 for i in v2:
-                    report.append(f"\n\t → Question: {i["question"]}")
-                    report.append(f"\n\t ✓ Response: {i["response"]}")
+                    report.append(f"\n\t → Question: {i['question']}")
+                    report.append(f"\n\t ✓ Response: {i['response']}")
     else:
         report = []
     return "\n".join(report)

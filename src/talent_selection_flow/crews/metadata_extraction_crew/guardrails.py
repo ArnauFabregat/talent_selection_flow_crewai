@@ -1,15 +1,18 @@
 import json
-from typing import Any, Tuple, List
+from typing import Any
+
 from crewai import TaskOutput
 from pycountry import countries
 
 from src.talent_selection_flow.crews.metadata_extraction_crew.enums import (
-    ExperienceLevel, EducationLevel, EmploymentType,
+    EducationLevel,
+    EmploymentType,
+    ExperienceLevel,
 )
 from src.utils.logger import logger
 
 
-def validate_cvmetadata_schema(result: TaskOutput) -> Tuple[bool, Any]:
+def validate_cvmetadata_schema(result: TaskOutput) -> tuple[bool, Any]:
     """Validates JSON format, schema, and enum values in one pass."""
     logger.debug(f"Guardrail input:\n{result.raw}")
     # 1. Validate JSON
@@ -19,8 +22,8 @@ def validate_cvmetadata_schema(result: TaskOutput) -> Tuple[bool, Any]:
         logger.warning("Guardrail `validate_cvmetadata_schema` triggered: invalid JSON format")
         return (False, "Invalid JSON format. Please fix")
 
-    fields: List[str] = []
-    errors: List[str] = []
+    fields: list[str] = []
+    errors: list[str] = []
 
     # 2. Validate enums
     if data.get("education_level") not in EducationLevel._value2member_map_:
@@ -45,7 +48,7 @@ def validate_cvmetadata_schema(result: TaskOutput) -> Tuple[bool, Any]:
     return (True, json.dumps(data))
 
 
-def validate_jobmetadata_schema(result: TaskOutput) -> Tuple[bool, Any]:
+def validate_jobmetadata_schema(result: TaskOutput) -> tuple[bool, Any]:
     """Validates JSON format, schema, and enum values in one pass."""
     logger.debug(f"Guardrail input:\n{result.raw}")
     # 1. Validate JSON
@@ -55,8 +58,8 @@ def validate_jobmetadata_schema(result: TaskOutput) -> Tuple[bool, Any]:
         logger.warning("Guardrail `validate_jobmetadata_schema` triggered: invalid JSON format")
         return (False, "Invalid JSON format. Please fix")
 
-    fields: List[str] = []
-    errors: List[str] = []
+    fields: list[str] = []
+    errors: list[str] = []
 
     # 2. Validate enums
     if data.get("employment_type") not in EmploymentType._value2member_map_:

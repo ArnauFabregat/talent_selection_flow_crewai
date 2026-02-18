@@ -1,16 +1,18 @@
-from typing import Any, List
+from typing import Any
+
 import chainlit as cl
 import pymupdf4llm
 
-from src.talent_selection_flow.flow import TalentSelectionFlow
 from src.talent_selection_flow.crews.hr_consultant_crew.crew import HRConsultingCrew
+from src.talent_selection_flow.flow import TalentSelectionFlow
 
 
-def get_actions() -> List[Any]:
+def get_actions() -> list[Any]:
     return [
         cl.Action(name="restart_flow", value="restart", label="🔄 Start New Evaluation", payload={}),
-        cl.Action(name="download_report_txt", value="download", label="📥 Download Recruitment Analysis Report",
-                  payload={})
+        cl.Action(
+            name="download_report_txt", value="download", label="📥 Download Recruitment Analysis Report", payload={}
+        ),
     ]
 
 
@@ -21,7 +23,7 @@ async def run_talent_flow() -> None:
     # Selection: PDF or Text
     actions = [
         cl.Action(name="pdf_mode", value="pdf", label="📄 Upload PDF", payload={}),
-        cl.Action(name="text_mode", value="text", label="✍️ Paste Text", payload={})
+        cl.Action(name="text_mode", value="text", label="✍️ Paste Text", payload={}),
     ]
 
     choice = await cl.AskActionMessage(
@@ -42,7 +44,7 @@ async def run_talent_flow() -> None:
     else:
         res = await cl.AskUserMessage(content="Please paste the resume text here:").send()
         file_name = "Pasted Text Input"
-        input_doc = res['output']
+        input_doc = res["output"]
 
     # Visual Orchestration
     async with cl.Step(name="Talent Selection Flow", type="run") as step:
@@ -58,23 +60,25 @@ async def run_talent_flow() -> None:
     cl.user_session.set("evaluation_report", result)
 
     # Final result with Restart Action
-    context_note = "\n\n*> 💡 Context: I'm currently tracking the last 6 messages " \
-                   "to stay focused on our immediate conversation.*"
+    context_note = (
+        "\n\n*> 💡 Context: I'm currently tracking the last 6 messages to stay focused on our immediate conversation.*"
+    )
     await cl.Message(
         content=f"### ✅ Evaluation Result\n\n{result}\n\n---\n💬 **You can now ask follow-up questions "
-                f"about this candidate, or click the button above to reset.**{context_note}",
+        f"about this candidate, or click the button above to reset.**{context_note}",
         actions=get_actions(),
     ).send()
 
 
 # --- EVENT HANDLERS ---
 
+
 @cl.on_chat_start
 async def start() -> None:
     """Initial greeting and start of the flow"""
     await cl.Message(
         content="👋 **Welcome to the Talent Scout Assistant.**\nI'll help you analyze candidates using "
-                "Multi-Agent intelligence."
+        "Multi-Agent intelligence."
     ).send()
     await run_talent_flow()
 
@@ -118,11 +122,13 @@ async def handle_chat(message: cl.Message) -> None:
     async with cl.Step(name="HR Consultant Flow", type="llm") as step:
         step.input = "⚙️ Orchestrating agents for evaluation..."
         crew = HRConsultingCrew(verbose=True)
-        res = await cl.make_async(crew.crew().kickoff)(inputs={
-            "report": report,
-            "context_summary": context_summary,
-            "message": message.content,
-        })
+        res = await cl.make_async(crew.crew().kickoff)(
+            inputs={
+                "report": report,
+                "context_summary": context_summary,
+                "message": message.content,
+            }
+        )
 
         # 3. Update history: Add current turn and save back to session
         history.append(f"User: {message.content}")
@@ -143,13 +149,8 @@ async def on_download_txt(action: cl.Action) -> None:
 
     # 2. Create the file element (using binary encoding)
     file_element = cl.File(
-        content=report_text.encode("utf-8"),
-        name="recruitment_analysis_report.txt",
-        display="inline"
+        content=report_text.encode("utf-8"), name="recruitment_analysis_report.txt", display="inline"
     )
 
     # 3. Send the file to the UI
-    await cl.Message(
-        content="💾 **Your report is ready for download:**",
-        elements=[file_element]
-    ).send()
+    await cl.Message(content="💾 **Your report is ready for download:**", elements=[file_element]).send()

@@ -55,10 +55,10 @@ job_example = """
 # JOB POSTING: Senior Backend Engineer (AI Systems)
 
 ## POSITION OVERVIEW
-We are seeking a Senior Backend Engineer to join our AI Orchestration team. 
+We are seeking a Senior Backend Engineer to join our AI Orchestration team.
 The ...
 ...
-... 
+...
 """
 response = await TalentSelectionFlow(verbose=False).kickoff_async(
     inputs={"raw_input": job_example}
@@ -188,4 +188,3 @@ Open a terminal in VSCode and execute the following command:
     - langchain: https://docs.langchain.com/oss/python/integrations/tools
 
 - Crewai examples: https://docs.crewai.com/en/examples/example
-

@@ -5,12 +5,12 @@ Import `logger` from here.
 
 import logging
 import sys
-from typing import List, Optional
+
 from loguru import logger
 
 from src.config.params import DEBUG_LOGS
 
-DEPENDENCIES_WITH_LOGGING: List[str] = []
+DEPENDENCIES_WITH_LOGGING: list[str] = []
 
 LOG_FORMAT = (
     "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
@@ -20,7 +20,7 @@ LOG_FORMAT = (
 )
 
 
-def disable_dependency_loggers(dependencies: List[str]) -> None:
+def disable_dependency_loggers(dependencies: list[str]) -> None:
     """
     Disables the passed dependencies from Python's default logging library
 
@@ -34,7 +34,7 @@ def disable_dependency_loggers(dependencies: List[str]) -> None:
         logging.getLogger(name).propagate = False
 
 
-def setup_logger(debug: Optional[bool] = None) -> None:
+def setup_logger(debug: bool | None = None) -> None:
     logger.remove()
 
     # Determine the "Floor" level (DEBUG or INFO)
@@ -63,7 +63,7 @@ def setup_logger(debug: Optional[bool] = None) -> None:
         rotation="10 MB",
         retention="10 days",
         compression="zip",
-        enqueue=True
+        enqueue=True,
     )
 
 

@@ -1,18 +1,18 @@
 # query_jobs(), init client, etc.
-from pathlib import Path
-from dotenv import load_dotenv
+import json
 import os
 import time
-from tqdm import tqdm
-import pandas as pd
-import json
-
-from src.utils.logger import logger
-from src.config.paths import CHROMA_DIR
+from pathlib import Path
+from typing import Any
 
 import chromadb
+import pandas as pd
 from chromadb.utils.embedding_functions import JinaEmbeddingFunction
-from typing import Any, Dict, Optional
+from dotenv import load_dotenv
+from tqdm import tqdm
+
+from src.config.paths import CHROMA_DIR
+from src.utils.logger import logger
 
 # Load environment variables from .env file
 load_dotenv()
@@ -48,12 +48,12 @@ def get_collection(client: Any, collection_name: str) -> Any:
 
 
 def add_to_collection(
-        metadata_extractor: Any,
-        corpus: pd.DataFrame,
-        collection: Any,
-        max_rpm: Optional[int] = None,
-        verbose: bool = False,
-        **kwargs,
+    metadata_extractor: Any,
+    corpus: pd.DataFrame,
+    collection: Any,
+    max_rpm: int | None = None,
+    verbose: bool = False,
+    **kwargs,
 ) -> None:
     """
     Add documents with extracted metadata to a ChromaDB collection,
@@ -94,14 +94,10 @@ def add_to_collection(
             logger.warning(f"Null metadata keys for `doc_id={row['doc_id']}`: {null_keys}")
 
         # Add to ChromaDB
-        collection.add(
-            ids=[str(row["doc_id"])],
-            documents=[row["content"]],
-            metadatas=[metadata_dict]
-        )
+        collection.add(ids=[str(row["doc_id"])], documents=[row["content"]], metadatas=[metadata_dict])
 
 
-def reshape_chroma_results(chroma_output: Dict[str, Any]) -> Dict[str, Any]:
+def reshape_chroma_results(chroma_output: dict[str, Any]) -> dict[str, Any]:
     """
     Output format:
     {
@@ -117,11 +113,11 @@ def reshape_chroma_results(chroma_output: Dict[str, Any]) -> Dict[str, Any]:
     }
     """
     # TODO if chroma_output is empty return empty json
-    # Dictionary comprehension; we take the first index [0] 
+    # Dictionary comprehension; we take the first index [0]
     # because you likely queried with a single CV.
-    ids = chroma_output['ids'][0]
-    distances = chroma_output['distances'][0]
-    metadatas = chroma_output['metadatas'][0]
+    ids = chroma_output["ids"][0]
+    distances = chroma_output["distances"][0]
+    metadatas = chroma_output["metadatas"][0]
 
     return {
         ids[i]: {
@@ -143,7 +139,7 @@ def query_to_collection(
     country: str,
     persist_dir: str = CHROMA_DIR,
     top_k: int = 3,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Retrieves the most relevant documents from ChromaDB with a metadata fallback strategy.
     """
@@ -155,11 +151,7 @@ def query_to_collection(
 
     # Primary Search: Strict filtering by country
     if country:
-        results = collection.query(
-            query_texts=[query_text],
-            n_results=top_k,
-            where={"country": country}
-        )
+        results = collection.query(query_texts=[query_text], n_results=top_k, where={"country": country})
 
     # Fallback Strategy: If no results found with country filter, widen the search
     if (country is None) or (results["ids"] == [[]]):
