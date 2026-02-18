@@ -1,10 +1,12 @@
-from typing import List
+from typing import Any, List
 import chainlit as cl
+import pymupdf4llm
+
 from src.talent_selection_flow.flow import TalentSelectionFlow
 from src.talent_selection_flow.crews.hr_consultant_crew.crew import HRConsultingCrew
 
 
-def get_actions() -> List[cl.Action]:
+def get_actions() -> List[Any]:
     return [
         cl.Action(name="restart_flow", value="restart", label="🔄 Start New Evaluation", payload={}),
         cl.Action(name="download_report_txt", value="download", label="📥 Download Recruitment Analysis Report",
@@ -13,7 +15,7 @@ def get_actions() -> List[cl.Action]:
 
 
 # --- CORE WORKFLOW LOGIC ---
-async def run_talent_flow():
+async def run_talent_flow() -> None:
     """The main process for uploading and evaluating a candidate"""
 
     # Selection: PDF or Text
@@ -28,14 +30,18 @@ async def run_talent_flow():
         timeout=300,
     ).send()
 
-    if choice.get("value") == "pdf":
+    if choice["name"] == "pdf_mode":
         files = await cl.AskFileMessage(
             content="Please upload the candidate's Resume (PDF)",
-            accept=["data/raw/pdf"]
+            accept=["application/pdf"],
+            max_files=1,
         ).send()
-        input_doc = files[0].path
+        file_name = files[0].name
+        input_doc = pymupdf4llm.to_markdown(files[0].path)
+
     else:
         res = await cl.AskUserMessage(content="Please paste the resume text here:").send()
+        file_name = "Pasted Text Input"
         input_doc = res['output']
 
     # Visual Orchestration
@@ -43,7 +49,7 @@ async def run_talent_flow():
         step.input = "⚙️ Orchestrating agents for evaluation..."
         flow = TalentSelectionFlow(verbose=False)
         result = await cl.make_async(flow.kickoff)(inputs={"raw_input": input_doc})
-        step.output = "Evaluation complete."
+        step.output = f"**Evaluation complete for** *{file_name}*:\n{input_doc}"
 
     # Store the user input in the session for the Q&A loop
     cl.user_session.set("chat_history", [f"User: Please analyze this document: {input_doc}"])
@@ -64,7 +70,7 @@ async def run_talent_flow():
 # --- EVENT HANDLERS ---
 
 @cl.on_chat_start
-async def start():
+async def start() -> None:
     """Initial greeting and start of the flow"""
     await cl.Message(
         content="👋 **Welcome to the Talent Scout Assistant.**\nI'll help you analyze candidates using "
@@ -74,7 +80,7 @@ async def start():
 
 
 @cl.action_callback("restart_flow")
-async def on_restart(action):
+async def on_restart(action: cl.Action) -> None:
     """Guide the user to the only 100% reliable reset method"""
 
     # 1. Visual feedback that the request was heard
@@ -92,7 +98,7 @@ async def on_restart(action):
 
 
 @cl.on_message
-async def handle_chat(message: cl.Message):
+async def handle_chat(message: cl.Message) -> None:
     """Interactive Q&A loop: Triggered whenever the user types a message"""
     # 1. Configuration
     MAX_HISTORY_MESSAGES = 6  # Keeps the last 3 user/assistant pairs
@@ -127,7 +133,7 @@ async def handle_chat(message: cl.Message):
 
 
 @cl.action_callback("download_report_txt")
-async def on_download_txt(action):
+async def on_download_txt(action: cl.Action) -> None:
     # 1. Retrieve the report from the user session
     report_text = cl.user_session.get("evaluation_report")
 
