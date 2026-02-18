@@ -1,12 +1,13 @@
 import json
-from typing import Any, Tuple, List
+from typing import Any
+
 from crewai import TaskOutput
 
-from src.utils.logger import logger
 from src.talent_selection_flow.crews.cv_to_job_crew.schemas import GapAnalysis, Questions
+from src.utils.logger import logger
 
 
-def validate_gapanalysisoutput_schema(result: TaskOutput) -> Tuple[bool, Any]:
+def validate_gapanalysisoutput_schema(result: TaskOutput) -> tuple[bool, Any]:
     """Validates JSON format, schema, and enum values in one pass."""
     logger.debug(f"Guardrail input:\n{result.raw}")
     # 1. Validate JSON
@@ -16,7 +17,7 @@ def validate_gapanalysisoutput_schema(result: TaskOutput) -> Tuple[bool, Any]:
         logger.warning("Guardrail `validate_gapanalysisoutput_schema` triggered: invalid JSON format")
         return (False, "Invalid JSON format. Please fix")
 
-    errors: List[str] = []
+    errors: list[str] = []
 
     # 1. Validate first nesting level
     if "docs" not in data or not isinstance(data["docs"], dict):
@@ -43,7 +44,7 @@ def validate_gapanalysisoutput_schema(result: TaskOutput) -> Tuple[bool, Any]:
     return (True, json.dumps(data))
 
 
-def validate_interviewquestionsoutput_schema(result: TaskOutput) -> Tuple[bool, Any]:
+def validate_interviewquestionsoutput_schema(result: TaskOutput) -> tuple[bool, Any]:
     """Validates JSON format, schema, and enum values in one pass."""
     logger.debug(f"Guardrail input:\n{result.raw}")
     # 1. Validate JSON
@@ -53,7 +54,7 @@ def validate_interviewquestionsoutput_schema(result: TaskOutput) -> Tuple[bool, 
         logger.warning("Guardrail `validate_interviewquestionsoutput_schema` triggered: invalid JSON format")
         return (False, "Invalid JSON format. Please fix")
 
-    errors: List[str] = []
+    errors: list[str] = []
 
     # 1. Validate first nesting level
     if "docs" not in data or not isinstance(data["docs"], dict):
@@ -73,8 +74,9 @@ def validate_interviewquestionsoutput_schema(result: TaskOutput) -> Tuple[bool, 
     # 3. Return
     if errors:
         logger.warning("Guardrail `validate_interviewquestionsoutput_schema` triggered: invalid doc entries.")
-        feedback: str = "Guardrail `validate_interviewquestionsoutput_schema` " \
-                        "validation failed:\n- " + "\n- ".join(errors)
+        feedback: str = "Guardrail `validate_interviewquestionsoutput_schema` validation failed:\n- " + "\n- ".join(
+            errors
+        )
         logger.debug(feedback)
         return (False, feedback)
 

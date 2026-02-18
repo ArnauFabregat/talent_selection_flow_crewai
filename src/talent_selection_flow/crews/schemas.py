@@ -1,14 +1,9 @@
 from pydantic import BaseModel, Field
-from typing import List
 
 
 class GapAnalysis(BaseModel):
-    matched_skills: List[str] = Field(
-        description="Skills evidenced in the CV that match the job requirements."
-    )
-    missing_must_have: List[str] = Field(
-        description="Must-have requirements not evidenced in the CV."
-    )
+    matched_skills: list[str] = Field(description="Skills evidenced in the CV that match the job requirements.")
+    missing_must_have: list[str] = Field(description="Must-have requirements not evidenced in the CV.")
 
 
 class QuestionItem(BaseModel):
@@ -17,15 +12,9 @@ class QuestionItem(BaseModel):
 
 
 class Questions(BaseModel):
-    matched_skill_questions: List[QuestionItem] = Field(
-        description="Questions validating matched skills."
-    )
-    gap_probing_questions: List[QuestionItem] = Field(
-        description="Questions exploring must-have gaps."
-    )
-    ambiguity_clarification_questions: List[QuestionItem] = Field(
+    matched_skill_questions: list[QuestionItem] = Field(description="Questions validating matched skills.")
+    gap_probing_questions: list[QuestionItem] = Field(description="Questions exploring must-have gaps.")
+    ambiguity_clarification_questions: list[QuestionItem] = Field(
         description="Questions clarifying unclear information."
     )
-    seniority_questions: List[QuestionItem] = Field(
-        description="Questions assessing seniority alignment."
-    )
+    seniority_questions: list[QuestionItem] = Field(description="Questions assessing seniority alignment.")

@@ -1,25 +1,29 @@
-from crewai.flow.flow import Flow, listen, router, start, or_
-from typing import Any
+# type: ignore
 import json
 from pathlib import Path
+from typing import Any
+
+from crewai.flow.flow import Flow, listen, or_, router, start
 
 from src.config.paths import REPORT_OUTPUT_PATH
 from src.constants import GUARDRAIL_MAX_RETRIES
-from src.utils.logger import logger
-
 from src.db_ingestion.chroma_client import query_to_collection
-from src.talent_selection_flow.schemas import TalentState
-from src.talent_selection_flow.crews.utils import render_to_markdown
-from src.talent_selection_flow.crews.metadata_extraction_crew.crews import (
-    CVMetadataExtractorCrew, JobMetadataExtractorCrew,
-)
-from src.talent_selection_flow.crews.metadata_extraction_crew.enums import (
-    ExperienceLevel, EducationLevel, EmploymentType,
-)
-from src.talent_selection_flow.crews.classification_crew.enums import DocumentType
 from src.talent_selection_flow.crews.classification_crew.crew import ClassificationCrew
+from src.talent_selection_flow.crews.classification_crew.enums import DocumentType
 from src.talent_selection_flow.crews.cv_to_job_crew.crew import CVToJobCrew
 from src.talent_selection_flow.crews.job_to_cv_crew.crew import JobToCVCrew
+from src.talent_selection_flow.crews.metadata_extraction_crew.crews import (
+    CVMetadataExtractorCrew,
+    JobMetadataExtractorCrew,
+)
+from src.talent_selection_flow.crews.metadata_extraction_crew.enums import (
+    EducationLevel,
+    EmploymentType,
+    ExperienceLevel,
+)
+from src.talent_selection_flow.crews.utils import render_to_markdown
+from src.talent_selection_flow.schemas import TalentState
+from src.utils.logger import logger
 
 
 class TalentSelectionFlow(Flow[TalentState]):
@@ -41,13 +45,19 @@ class TalentSelectionFlow(Flow[TalentState]):
 
     @start()
     def classify_input(self) -> None:
-        result = ClassificationCrew(
-            verbose=self._verbose,
-            guardrail_max_retries=self._guardrail_max_retries,
-        ).crew().kickoff(inputs={
-            "user_input": self.state.raw_input,
-            "output_options": "/".join(DocumentType),
-        })
+        result = (
+            ClassificationCrew(
+                verbose=self._verbose,
+                guardrail_max_retries=self._guardrail_max_retries,
+            )
+            .crew()
+            .kickoff(
+                inputs={
+                    "user_input": self.state.raw_input,
+                    "output_options": "/".join(DocumentType),
+                }
+            )
+        )
         self.state.input_type = result.raw
 
     @router(classify_input)
@@ -61,26 +71,38 @@ class TalentSelectionFlow(Flow[TalentState]):
     def extract_metadata(self) -> Any:
         if self.state.input_type == DocumentType.CV:
             # Extract cv metadata
-            metadata = CVMetadataExtractorCrew(
-                guardrail_max_retries=self._guardrail_max_retries,
-                verbose=self._verbose,
-                human_input=False,
-            ).crew().kickoff(inputs={
-                "content": self.state.raw_input,
-                "educationlevel_options": "/".join(EducationLevel),
-                "experiencelevel_options": "/".join(ExperienceLevel),
-            })
+            metadata = (
+                CVMetadataExtractorCrew(
+                    guardrail_max_retries=self._guardrail_max_retries,
+                    verbose=self._verbose,
+                    human_input=False,
+                )
+                .crew()
+                .kickoff(
+                    inputs={
+                        "content": self.state.raw_input,
+                        "educationlevel_options": "/".join(EducationLevel),
+                        "experiencelevel_options": "/".join(ExperienceLevel),
+                    }
+                )
+            )
         else:
             # Extract job metadata
-            metadata = JobMetadataExtractorCrew(
-                guardrail_max_retries=self._guardrail_max_retries,
-                verbose=self._verbose,
-                human_input=False,
-            ).crew().kickoff(inputs={
-                "content": self.state.raw_input,
-                "employmenttype_options": "/".join(EmploymentType),
-                "experiencelevel_options": "/".join(ExperienceLevel),
-            })
+            metadata = (
+                JobMetadataExtractorCrew(
+                    guardrail_max_retries=self._guardrail_max_retries,
+                    verbose=self._verbose,
+                    human_input=False,
+                )
+                .crew()
+                .kickoff(
+                    inputs={
+                        "content": self.state.raw_input,
+                        "employmenttype_options": "/".join(EmploymentType),
+                        "experiencelevel_options": "/".join(ExperienceLevel),
+                    }
+                )
+            )
         self.state.metadata = json.loads(metadata.raw)
 
     @listen(extract_metadata)
@@ -114,8 +136,7 @@ class TalentSelectionFlow(Flow[TalentState]):
             guardrail_max_retries=self._guardrail_max_retries,
         )
         _ = cv_crew.crew().kickoff(
-            inputs={"structured_cv": self.state.metadata,
-                    "related_jobs": self.state.related_docs}
+            inputs={"structured_cv": self.state.metadata, "related_jobs": self.state.related_docs}
         )
         self.state.process_crew = cv_crew
 
@@ -127,8 +148,7 @@ class TalentSelectionFlow(Flow[TalentState]):
             guardrail_max_retries=self._guardrail_max_retries,
         )
         _ = job_crew.crew().kickoff(
-            inputs={"structured_job": self.state.metadata,
-                    "related_cvs": self.state.related_docs}
+            inputs={"structured_job": self.state.metadata, "related_cvs": self.state.related_docs}
         )
         self.state.process_crew = job_crew
 
@@ -148,11 +168,14 @@ class TalentSelectionFlow(Flow[TalentState]):
         return report
 
     @listen("route_other")
-    def handle_other(self) -> None:
-        msg = f"Invalid document type. Expected '{DocumentType.CV}' or '{DocumentType.JOB}'. " \
+    def handle_other(self) -> str:
+        msg = (
+            f"Invalid document type. Expected '{DocumentType.CV}' or '{DocumentType.JOB}'. "
             "Please, start a new evaluation."
+        )
         logger.warning(msg)
         return msg
+
 
 # def kickoff() -> None:
 #     flow = TalentSelectionFlow()

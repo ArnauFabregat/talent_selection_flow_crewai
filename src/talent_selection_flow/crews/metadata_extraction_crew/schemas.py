@@ -1,8 +1,9 @@
 from pydantic import BaseModel
-from typing import Optional
 
 from src.talent_selection_flow.crews.metadata_extraction_crew.enums import (
-    ExperienceLevel, EducationLevel, EmploymentType,
+    EducationLevel,
+    EmploymentType,
+    ExperienceLevel,
 )
 
 
@@ -22,10 +23,10 @@ class BaseProfile(BaseModel):
         summary (str): Short document summary.
     """
 
-    skills: Optional[str] = None
-    industries: Optional[str] = None
+    skills: str | None = None
+    industries: str | None = None
     experience_level: ExperienceLevel
-    country: Optional[str] = None
+    country: str | None = None
     summary: str
 
 
@@ -39,7 +40,7 @@ class CVMetadata(BaseProfile):
     """
 
     education_level: EducationLevel
-    languages: Optional[str] = None
+    languages: str | None = None
 
 
 class JobMetadata(BaseProfile):
@@ -54,6 +55,6 @@ class JobMetadata(BaseProfile):
     """
 
     title: str
-    city: Optional[str] = None
+    city: str | None = None
     employment_type: EmploymentType
-    responsibilities: Optional[str] = None
+    responsibilities: str | None = None
