@@ -31,7 +31,7 @@ The system uses two primary datasets sourced from Kaggle to train and evaluate t
 
 ## Agents Workflow
 
-Full Architecture Diagram (TBD)
+![Diagram](docs/flow_edited_2.png)
 
 The system will do three main workflows:
 - Metadata extraction from raw cv or job
