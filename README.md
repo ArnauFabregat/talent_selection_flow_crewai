@@ -181,7 +181,6 @@ Open a terminal in VSCode and execute the following command:
 
 ## TODO
 - Add top_k from input optional
-- Add docstrings
 - Add unit tests
 - Add max_iter and max_rpm to control rate limits in agents
 - Add agent that gets profiles from linkedin in JobToCVCrew

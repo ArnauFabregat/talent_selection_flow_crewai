@@ -9,10 +9,8 @@ from src.talent_selection_flow.flow import TalentSelectionFlow
 
 def get_actions() -> list[Any]:
     return [
-        cl.Action(name="restart_flow", value="restart", label="🔄 Start New Evaluation", payload={}),
-        cl.Action(
-            name="download_report_txt", value="download", label="📥 Download Recruitment Analysis Report", payload={}
-        ),
+        cl.Action(name="restart_flow", label="🔄 Start New Evaluation", payload={}),
+        cl.Action(name="download_report_txt", label="📥 Download Recruitment Analysis Report", payload={}),
     ]
 
 
@@ -22,8 +20,8 @@ async def run_talent_flow() -> None:
 
     # Selection: PDF or Text
     actions = [
-        cl.Action(name="pdf_mode", value="pdf", label="📄 Upload PDF", payload={}),
-        cl.Action(name="text_mode", value="text", label="✍️ Paste Text", payload={}),
+        cl.Action(name="pdf_mode", label="📄 Upload PDF", payload={}),
+        cl.Action(name="text_mode", label="✍️ Paste Text", payload={}),
     ]
 
     choice = await cl.AskActionMessage(
