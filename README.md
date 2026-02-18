@@ -36,7 +36,44 @@ Tech Stack:
 - 🤖 Interview Question Generator
 
 ## How to Run
-TBD
+
+This project provides two ways to run the Talent Selection workflow:
+
+### 🧠 1. Run the CrewAI Flow (Python)
+
+You can execute the complete multi‑agent workflow programmatically using the `flow.kickoff_async()` method:
+
+```python
+from IPython.display import Markdown, display
+from src.talent_selection_flow.flow import TalentSelectionFlow
+
+job_example = """
+# JOB POSTING: Senior Backend Engineer (AI Systems)
+
+## POSITION OVERVIEW
+We are seeking a Senior Backend Engineer to join our AI Orchestration team. 
+The ...
+...
+... 
+"""
+response = await TalentSelectionFlow(verbose=False).kickoff_async(
+    inputs={"raw_input": job_example}
+)
+
+display(Markdown(response))
+```
+### 💬 2. Run the Chat Interface (Chainlit)
+Interact with the Expert HR Consultant agent using a conversational UI powered by Chainlit.
+
+Start the app:
+```shell
+chainlit run app.py
+```
+After launching, open the URL shown in the terminal (typically: http://localhost:8000).
+The Chainlit interface allows you to:
+- Upload document to run `TalentSelectionFlow`
+- Ask questions about job descriptions or CVs (🤖 Expert HR Consultant)
+- More details [here](chainlit.md)
 
 ## Data Sources
 The system uses two primary datasets sourced from Kaggle to train and evaluate the CV-to-job matching algorithms:
@@ -136,7 +173,6 @@ Open a terminal in VSCode and execute the following command:
 
 ## TODO
 - Add top_k from input optional
-- Add documentation in README
 - Add docstrings
 - Add unit tests
 - Add max_iter and max_rpm to control rate limits in agents
