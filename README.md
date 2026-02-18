@@ -9,6 +9,10 @@ Tech Stack:
 - [**Jina**](https://jina.ai/) - Embedding model `jina-embeddings-v2-base-en` for semantic embeddings (free tier)
 - [**Chainlit**](https://docs.chainlit.io/get-started/overview) - LLM application UI framework
 
+# Demo
+
+https://github.com/user-attachments/assets/c25928ce-4502-4afc-b4ed-fa937f457375
+
 ## Table of Contents
 
 1. [Agents Workflow](#agents-workflow)
@@ -182,4 +186,5 @@ Open a terminal in VSCode and execute the following command:
 - Tools:
     - crewai: https://docs.crewai.com/en/concepts/tools
     - langchain: https://docs.langchain.com/oss/python/integrations/tools
+
 - Crewai examples: https://docs.crewai.com/en/examples/example
