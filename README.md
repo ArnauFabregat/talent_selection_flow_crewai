@@ -93,11 +93,15 @@ This project uses [pre-commit](https://pre-commit.com/) hooks to enforce code qu
 - **Code Linting & Formatting**: `ruff-check`, `ruff-format`
 - **Type Checking**: `mypy`
 
-Pre-commit hooks are automatically installed during virtual environment setup (`uv sync`). To run them manually:
-```bash
-.venv\Scripts\activate
-pre-commit run
-```
+Pre-commit hooks are automatically installed during virtual environment setup (`uv sync`).
+- To run them for modified (staged) files:
+    ```bash
+    uv run pre-commit run
+    ```
+- To run them for the entire repository:
+    ```bash
+    uv run pre-commit run --all-files
+    ```
 
 ### Unit Testing
 ---

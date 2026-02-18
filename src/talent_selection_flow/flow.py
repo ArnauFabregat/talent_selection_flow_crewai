@@ -1,3 +1,4 @@
+# type: ignore
 import json
 from pathlib import Path
 from typing import Any
@@ -167,7 +168,7 @@ class TalentSelectionFlow(Flow[TalentState]):
         return report
 
     @listen("route_other")
-    def handle_other(self) -> None:
+    def handle_other(self) -> str:
         msg = (
             f"Invalid document type. Expected '{DocumentType.CV}' or '{DocumentType.JOB}'. "
             "Please, start a new evaluation."

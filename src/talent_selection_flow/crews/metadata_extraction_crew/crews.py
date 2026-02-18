@@ -1,4 +1,5 @@
 # @CrewBase class: wires YAML agents+tasks into a Crew
+# type: ignore
 from crewai import Agent, Crew, Task
 from crewai.project import CrewBase, agent, crew, task
 

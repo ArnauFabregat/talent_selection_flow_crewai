@@ -18,7 +18,7 @@ from src.utils.logger import logger
 load_dotenv()
 
 
-def get_client(persist_dir: str = CHROMA_DIR) -> Any:
+def get_client(persist_dir: str = str(CHROMA_DIR)) -> Any:
     """
     Initialize and return a ChromaDB client with the specified persistence directory.
     """
@@ -36,7 +36,7 @@ def get_collection(client: Any, collection_name: str) -> Any:
     """
     embedding_fn = JinaEmbeddingFunction(
         api_key=os.getenv("EMBEDDING_API_KEY"),  # https://jina.ai/
-        model_name=os.getenv("EMBEDDING_MODEL"),
+        model_name=os.getenv("EMBEDDING_MODEL", ""),
     )
 
     collection = client.get_or_create_collection(
@@ -137,7 +137,7 @@ def query_to_collection(
     collection_name: str,
     query_text: str,
     country: str,
-    persist_dir: str = CHROMA_DIR,
+    persist_dir: str = str(CHROMA_DIR),
     top_k: int = 3,
 ) -> dict[str, Any]:
     """

@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 groq_llm = LLM(
-    model=os.getenv("LLM_GROQ_MODEL"),
+    model=os.getenv("LLM_GROQ_MODEL", ""),
     api_key=os.getenv("LLM_GROQ_API_KEY"),
     temperature=0.6,  # [0, 2] Deterministic to creative responses
     max_tokens=2048,
@@ -15,7 +15,7 @@ groq_llm = LLM(
 
 
 gemini_llm = LLM(
-    model=os.getenv("LLM_GEMINI_MODEL"),
+    model=os.getenv("LLM_GEMINI_MODEL", ""),
     api_key=os.getenv("LLM_GEMINI_API_KEY"),
     temperature=0.6,
     top_p=0.9,
@@ -25,7 +25,7 @@ gemini_llm = LLM(
 
 
 openrouter_llm = LLM(
-    model=os.getenv("LLM_OPENROUTER_MODEL"),
+    model=os.getenv("LLM_OPENROUTER_MODEL", ""),
     base_url="https://openrouter.ai/api/v1",
     api_key=os.getenv("LLM_OPENROUTER_API_KEY"),
     temperature=0.6,
