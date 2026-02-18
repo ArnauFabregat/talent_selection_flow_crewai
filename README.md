@@ -1,6 +1,6 @@
 # OS Multiagent System
 
-An open-source multiagent system for talent selection using advanced AI techniques. This system leverages multiple specialized agents to analyze candidate profiles and job requirements, providing intelligent matching and insights.
+An open-source multiagent system for talent selection using advanced AI techniques. This system leverages multiple specialized agents to **analyze candidate profiles and job requirements, providing intelligent matching and insights**.
 
 Tech Stack:
 - [**CrewAI**](https://docs.crewai.com/en/quickstart) - Multi-agent orchestration framework
@@ -71,7 +71,7 @@ chainlit run app.py
 ```
 After launching, open the URL shown in the terminal (typically: http://localhost:8000).
 The Chainlit interface allows you to:
-- Upload document to run `TalentSelectionFlow`
+- Upload document and run `TalentSelectionFlow`
 - Ask questions about job descriptions or CVs (🤖 Expert HR Consultant)
 - More details [here](chainlit.md)
 
