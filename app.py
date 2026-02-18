@@ -32,7 +32,7 @@ async def run_talent_flow() -> None:
 
     if choice["name"] == "pdf_mode":
         files = await cl.AskFileMessage(
-            content="Please upload the candidate's Resume (PDF)",
+            content="Please upload the candidate's Resume or Job description (PDF)",
             accept=["application/pdf"],
             max_files=1,
         ).send()
