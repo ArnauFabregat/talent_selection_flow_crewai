@@ -16,8 +16,8 @@ def render_to_markdown(
             f"*Date: {datetime.today().strftime('%Y-%m-%d')}*",
             "\nThis document provides a comprehensive evaluation of the job role against several targeted candidates' "
             "cvs. The analysis was performed by an automated multi-agent system (CrewAI) that identifies skill gaps, "
-            "calculates role similarity, and generates tailored interview strategies to bridge the identified technical "
-            "voids.",
+            "calculates role similarity, and generates tailored interview strategies to bridge the identified "
+            "technical voids.",
             "## Job summary",
             "*This section provides a high-level overview of the job role, extracting key technical "
             "competencies, regional availability, and educational background to establish a baseline for comparison.*",
@@ -70,8 +70,8 @@ def render_to_markdown(
             f"*Date: {datetime.today().strftime('%Y-%m-%d')}*",
             "\nThis document provides a comprehensive evaluation of the candidate against several targeted job roles. "
             "The analysis was performed by an automated multi-agent system (CrewAI) that identifies skill gaps, "
-            "calculates role similarity, and generates tailored interview strategies to bridge the identified technical "
-            "voids.",
+            "calculates role similarity, and generates tailored interview strategies to bridge the identified "
+            "technical voids.",
             "## Candidate summary",
             "*This section provides a high-level overview of the candidate's professional profile, extracting key "
             "technical competencies, regional availability, and educational background to establish a baseline for "
