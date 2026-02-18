@@ -1,7 +1,9 @@
 from pydantic import BaseModel
 from typing import Optional
 
-from src.db_ingestion.metadata_extraction_crew.enums import ExperienceLevel, EducationLevel, EmploymentType
+from src.talent_selection_flow.crews.metadata_extraction_crew.enums import (
+    ExperienceLevel, EducationLevel, EmploymentType,
+)
 
 
 class BaseProfile(BaseModel):

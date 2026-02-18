@@ -41,5 +41,4 @@ launch.json
 .vscode/settings.json
 
 # Chainlit
-.chainlit/
 .files/

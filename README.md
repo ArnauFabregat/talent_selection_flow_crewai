@@ -1,6 +1,6 @@
 # OS Multiagent System
 
-An open-source multiagent system for talent selection using advanced AI techniques. This system leverages multiple specialized agents to analyze candidate profiles and job requirements, providing intelligent matching and insights.
+An open-source multiagent system for talent selection using advanced AI techniques. This system leverages multiple specialized agents to **analyze candidate profiles and job requirements, providing intelligent matching and insights**.
 
 Tech Stack:
 - [**CrewAI**](https://docs.crewai.com/en/quickstart) - Multi-agent orchestration framework
@@ -9,72 +9,114 @@ Tech Stack:
 - [**Jina**](https://jina.ai/) - Embedding model `jina-embeddings-v2-base-en` for semantic embeddings (free tier)
 - [**Chainlit**](https://docs.chainlit.io/get-started/overview) - LLM application UI framework
 
+### Demo
+
+https://github.com/user-attachments/assets/c25928ce-4502-4afc-b4ed-fa937f457375
+
 ## Table of Contents
 
-1. [Data Sources](#data-sources)
-2. [Agents Workflow](#agents-workflow)
-3. [How to Run](#how-to-run)
-4. [Virtual Environment](#virtual-environment)
-    - [Create a new virtualenv with the project's dependencies](#create-a-new-virtualenv-with-the-projects-dependencies)
-    - [Checking if the project's virtual environment is active](#checking-if-the-projects-virtual-environment-is-active)
-    - [Updating the project's dependencies](#updating-the-projects-dependencies)
-5. [Code Quality & Documentation](#code-quality--documentation)
+1. [Agents Workflow](#agents-workflow)
+2. [How to Run](#how-to-run)
+3. [Data Sources](#data-sources)
+4. [Code Quality & Documentation](#code-quality--documentation)
     - [Pre-commit Hooks](#pre-commit-hooks)
     - [Unit Testing](#unit-testing)
     - [Peer Review](#peer-review)
+5. [Virtual Environment](#virtual-environment)
+    - [Create a new virtualenv with the project's dependencies](#create-a-new-virtualenv-with-the-projects-dependencies)
+    - [Checking if the project's virtual environment is active](#checking-if-the-projects-virtual-environment-is-active)
+    - [Updating the project's dependencies](#updating-the-projects-dependencies)
 6. [TODO](#todo)
+
+## Agents Workflow
+
+![Diagram](docs/flow_edited.png)
+
+### Roles Overview
+- 🤖 Professional Document Classifier
+- 🤖 CV Metadata Extractor
+- 🤖 Job Metadata Extractor
+- 🤖 Skill Gap Identifier
+- 🤖 Interview Question Generator
+
+## How to Run
+
+This project provides two ways to run the Talent Selection workflow:
+
+### 🧠 1. Run the CrewAI Flow (Python)
+
+You can execute the complete multi‑agent workflow programmatically using the `flow.kickoff_async()` method:
+
+```python
+from IPython.display import Markdown, display
+from src.talent_selection_flow.flow import TalentSelectionFlow
+
+job_example = """
+# JOB POSTING: Senior Backend Engineer (AI Systems)
+
+## POSITION OVERVIEW
+We are seeking a Senior Backend Engineer to join our AI Orchestration team. 
+The ...
+...
+... 
+"""
+response = await TalentSelectionFlow(verbose=False).kickoff_async(
+    inputs={"raw_input": job_example}
+)
+
+display(Markdown(response))
+```
+### 💬 2. Run the Chat Interface (Chainlit)
+Interact with the Expert HR Consultant agent using a conversational UI powered by Chainlit.
+
+Start the app:
+```shell
+chainlit run app.py
+```
+After launching, open the URL shown in the terminal (typically: http://localhost:8000).
+The Chainlit interface allows you to:
+- Upload document and run `TalentSelectionFlow`
+- Ask questions about job descriptions or CVs (🤖 Expert HR Consultant)
+- More details [here](chainlit.md)
 
 ## Data Sources
 The system uses two primary datasets sourced from Kaggle to train and evaluate the CV-to-job matching algorithms:
 - CV data: https://www.kaggle.com/datasets/snehaanbhawal/resume-dataset
 - Job posts data: https://www.kaggle.com/datasets/shivamb/real-or-fake-fake-jobposting-prediction
 
-## Agents Workflow
+## Code Quality & Documentation
+### Pre-commit Hooks
+---
+This project uses [pre-commit](https://pre-commit.com/) hooks to enforce code quality standards automatically before each commit. The following hooks are configured:
 
-Full Architecture Diagram (TBD)
+- **Formatting & File Integrity**: `trailing-whitespace`, `end-of-file-fixer`, `check-yaml`, `check-toml`
+- **Code Linting & Formatting**: `ruff-check`, `ruff-format`
+- **Type Checking**: `mypy`
 
-The system will do three main workflows:
-- Metadata extraction from raw cv or job
-- CV → Related Jobs → Gaps → Interview Questions → Final Report
-- Job → Related CVs → Gaps → Interview Questions → Final Report
+Pre-commit hooks are automatically installed during virtual environment setup (`uv sync`). To run them manually:
+```bash
+.venv\Scripts\activate
+pre-commit run
+```
 
-Agents description:
-0) Metadata extractor Agents: cvs and jobs.
-1) Orchestrator Agent.
-    - **Role**: Entry point. Detects whether the user uploaded a CV or a job description and selects the correct workflow.
-    - **Tools**: None or simple classification LLM.
-    - **Goal**: Pick the correct pipeline (CV→JD or JD→CV).
-2) CV → Job Retrieval Agent.
-    - **Role**: Given a CV (plain text), embed & query ChromaDB to retrieve top X job descriptions.
-    - **Knowledge**: ChromaDB job embeddings.
-    - **Goal**: Return a ranked list of job postings related to the CV.
-3) Job → CV Retrieval Agent. This is symmetric to agent #2.
-    - **Role**: Given a job description, embed & query ChromaDB to retrieve top X candidate CVs.
-    - **Knowledge**: ChromaDB CV embeddings.
-    - **Goal**: Return a ranked list of candidates.
-4) Gap Identifier Agent.
-    - **Role**:
-        - Compare candidate skills vs job requirements.
-        - Identify missing skills (skill gaps).
-        - Provide severity levels (must‑have / nice‑to‑have).
-    - **Goal**: Output a structured JSON of gaps.
-5) Interview Question Generator Agent.
-    - **Role**: Generate HR-friendly interview questions based on:
-        - Skills matched
-        - Skills missing
-        - Ambiguities in experience
-        - Seniority expectations
-    - **Goal**: Provide 5–10 tailored questions per match.
-6) Report Writer Agent
-    - **Role**: Combine outputs into a clean, final PDF/text report:
-        - Top matches
-        - Score explanations
-        - Skill gaps
-        - Interview questions
-        - Overall recommendation
-    - **Goal**: Produce a polished summary for HR.
+### Unit Testing
+---
+Unit tests ensure code reliability and prevent regressions. Tests are written using pytest and should cover critical functionality.
 
-## How to Run
+To run all tests:
+```bash
+uv run pytest
+```
+
+To run tests with coverage:
+```bash
+uv run pytest --cov
+```
+
+### Peer Review
+---
+All code contributions are subject to peer review. Detailed review guidelines and standards are documented in the project's peer review guidelines document.
+
 TBD
 
 ## Virtual Environment
@@ -133,53 +175,17 @@ This command will update the project's files `pyproject.toml` and `uv.lock` auto
 Open a terminal in VSCode and execute the following command:
 * `uv sync`
 
-## Code Quality & Documentation
-### Pre-commit Hooks
----
-This project uses [pre-commit](https://pre-commit.com/) hooks to enforce code quality standards automatically before each commit. The following hooks are configured:
-
-- **Formatting & File Integrity**: `trailing-whitespace`, `end-of-file-fixer`, `check-yaml`, `check-toml`
-- **Code Linting & Formatting**: `ruff-check`, `ruff-format`
-- **Type Checking**: `mypy`
-
-Pre-commit hooks are automatically installed during virtual environment setup (`uv sync`). To run them manually:
-```bash
-.venv\Scripts\activate
-pre-commit run
-```
-
-### Unit Testing
----
-Unit tests ensure code reliability and prevent regressions. Tests are written using pytest and should cover critical functionality.
-
-To run all tests:
-```bash
-uv run pytest
-```
-
-To run tests with coverage:
-```bash
-uv run pytest --cov
-```
-
-### Peer Review
----
-All code contributions are subject to peer review. Detailed review guidelines and standards are documented in the project's peer review guidelines document.
-
-TBD
-
 ## TODO
 - Add top_k from input optional
-- Add documentation in README
 - Add docstrings
 - Add unit tests
 - Add max_iter and max_rpm to control rate limits in agents
-- Add chainlit and save logs in file
-- Add pdf mapper if pdf input
 - Add agent that gets profiles from linkedin in JobToCVCrew
     - https://github.com/crewAIInc/crewAI-examples/blob/main/crews/recruitment/src/recruitment/tools/linkedin.py
     - add reasoning True with max_reasoning_attempts
 - Tools:
     - crewai: https://docs.crewai.com/en/concepts/tools
     - langchain: https://docs.langchain.com/oss/python/integrations/tools
+
 - Crewai examples: https://docs.crewai.com/en/examples/example
+

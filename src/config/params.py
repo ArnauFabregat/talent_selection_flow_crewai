@@ -1,1 +1,1 @@
-DEBUG_LOGS = True
+DEBUG_LOGS = False

@@ -116,12 +116,13 @@ def reshape_chroma_results(chroma_output: Dict[str, Any]) -> Dict[str, Any]:
     }
     }
     """
+    # TODO if chroma_output is empty return empty json
     # Dictionary comprehension; we take the first index [0] 
     # because you likely queried with a single CV.
     ids = chroma_output['ids'][0]
     distances = chroma_output['distances'][0]
     metadatas = chroma_output['metadatas'][0]
-    
+
     return {
         ids[i]: {
             "title": metadatas[i].get("title", ""),  # will be empty in de cvs collection
