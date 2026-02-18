@@ -1,3 +1,12 @@
+"""
+Talent Selection AI Assistant Module.
+
+This module provides a Chainlit-based interface for evaluating job candidates.
+It supports PDF uploads or text pasting, orchestrates multi-agent flows using
+the TalentSelectionFlow and HRConsultingCrew, and maintains a conversation
+history for follow-up Q&A.
+"""
+
 from typing import Any
 
 import chainlit as cl
@@ -8,6 +17,12 @@ from src.talent_selection_flow.flow import TalentSelectionFlow
 
 
 def get_actions() -> list[Any]:
+    """
+    Generates the standard persistent action buttons for the chat interface.
+
+    Returns:
+        list[cl.Action]: A list of Chainlit Action objects for restarting or downloading.
+    """
     return [
         cl.Action(name="restart_flow", label="🔄 Start New Evaluation", payload={}),
         cl.Action(name="download_report_txt", label="📥 Download Recruitment Analysis Report", payload={}),
@@ -16,7 +31,13 @@ def get_actions() -> list[Any]:
 
 # --- CORE WORKFLOW LOGIC ---
 async def run_talent_flow() -> None:
-    """The main process for uploading and evaluating a candidate"""
+    """
+    Orchestrates the primary talent evaluation workflow.
+
+    This function handles the initial user interaction (choosing input mode),
+    processes the input (PDF or Text), triggers the multi-agent selection flow,
+    and stores results in the user session.
+    """
 
     # Selection: PDF or Text
     actions = [
@@ -73,7 +94,11 @@ async def run_talent_flow() -> None:
 
 @cl.on_chat_start
 async def start() -> None:
-    """Initial greeting and start of the flow"""
+    """
+    Handles the initialization of the chat session.
+
+    Sends a welcome message and triggers the primary talent evaluation flow.
+    """
     await cl.Message(
         content="👋 **Welcome to the Talent Scout Assistant.**\nI'll help you analyze candidates using "
         "Multi-Agent intelligence."
@@ -83,7 +108,12 @@ async def start() -> None:
 
 @cl.action_callback("restart_flow")
 async def on_restart(action: cl.Action) -> None:
-    """Guide the user to the only 100% reliable reset method"""
+    """
+    Callback triggered when the user clicks the 'restart_flow' action.
+
+    Args:
+        action (cl.Action): The action object instance that triggered the callback.
+    """
 
     # 1. Visual feedback that the request was heard
     await cl.Message(
@@ -101,7 +131,15 @@ async def on_restart(action: cl.Action) -> None:
 
 @cl.on_message
 async def handle_chat(message: cl.Message) -> None:
-    """Interactive Q&A loop: Triggered whenever the user types a message"""
+    """
+    Handles follow-up messages from the user using a conversational HR agent.
+
+    Maintains context by passing the original report and a sliding window of
+    chat history to the HRConsultingCrew.
+
+    Args:
+        message (cl.Message): The message object containing the user's text.
+    """
     # 1. Configuration
     MAX_HISTORY_MESSAGES = 6  # Keeps the last 3 user/assistant pairs
 
@@ -113,7 +151,6 @@ async def handle_chat(message: cl.Message) -> None:
         return
 
     # 2. Format the sliding window context
-    # We slice the history to take only the last N items
     recent_history = history[-MAX_HISTORY_MESSAGES:]
     context_summary = "\n".join(recent_history)
 
@@ -138,6 +175,15 @@ async def handle_chat(message: cl.Message) -> None:
 
 @cl.action_callback("download_report_txt")
 async def on_download_txt(action: cl.Action) -> None:
+    """
+    Callback triggered when the user clicks the 'download_report_txt' action.
+
+    Retrieves the report from the session and provides it as a downloadable
+    text file in the chat UI.
+
+    Args:
+        action (cl.Action): The action object instance that triggered the callback.
+    """
     # 1. Retrieve the report from the user session
     report_text = cl.user_session.get("evaluation_report")
 

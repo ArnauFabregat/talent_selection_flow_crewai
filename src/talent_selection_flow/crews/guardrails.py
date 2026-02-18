@@ -1,3 +1,12 @@
+"""
+Task Output Guardrails Module.
+
+This module provides validation functions (guardrails) designed to verify that
+AI agents return structured data matching the expected JSON schema. It
+performs multi-level validation: JSON syntax, top-level key existence,
+and nested object schema via Pydantic.
+"""
+
 import json
 from typing import Any
 
@@ -8,7 +17,25 @@ from src.utils.logger import logger
 
 
 def validate_gapanalysisoutput_schema(result: TaskOutput) -> tuple[bool, Any]:
-    """Validates JSON format, schema, and enum values in one pass."""
+    """
+    Validates the JSON format and schema for Gap Analysis outputs.
+
+    This guardrail ensures the LLM output follows a nested dictionary structure:
+    {'docs': {'DOC_ID': GapAnalysisModel}}. It uses Pydantic to provide
+    detailed error feedback if technical validation fails.
+
+    Parameters
+    ----------
+    result : TaskOutput
+        The raw output object from the CrewAI task containing the generated string.
+
+    Returns
+    -------
+    tuple[bool, Any]
+        A tuple where the first element is a success flag (bool).
+        The second element is either the cleaned JSON string (on success)
+        or descriptive error feedback (on failure).
+    """
     logger.debug(f"Guardrail input:\n{result.raw}")
     # 1. Validate JSON
     try:
@@ -45,7 +72,24 @@ def validate_gapanalysisoutput_schema(result: TaskOutput) -> tuple[bool, Any]:
 
 
 def validate_interviewquestionsoutput_schema(result: TaskOutput) -> tuple[bool, Any]:
-    """Validates JSON format, schema, and enum values in one pass."""
+    """
+    Validates the JSON format and schema for Interview Questions outputs.
+
+    Similar to the gap analysis guardrail, this ensures the LLM correctly
+    attributes sets of interview questions to specific document IDs
+    under a top-level 'docs' key.
+
+    Parameters
+    ----------
+    result : TaskOutput
+        The raw output object from the CrewAI task.
+
+    Returns
+    -------
+    tuple[bool, Any]
+        A success/fail tuple where failure includes granular Pydantic
+        validation errors to guide LLM re-generation.
+    """
     logger.debug(f"Guardrail input:\n{result.raw}")
     # 1. Validate JSON
     try:

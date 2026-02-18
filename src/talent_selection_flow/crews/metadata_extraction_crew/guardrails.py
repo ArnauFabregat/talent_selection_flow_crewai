@@ -1,3 +1,11 @@
+"""
+Metadata Validation Guardrails.
+
+This module provides specialized validation functions for CV and Job metadata.
+Beyond basic JSON schema checks, it enforces strict enum compliance and
+standardizes geographic data using the ISO 3166-1 alpha-2 standard via `pycountry`.
+"""
+
 import json
 from typing import Any
 
@@ -13,7 +21,23 @@ from src.utils.logger import logger
 
 
 def validate_cvmetadata_schema(result: TaskOutput) -> tuple[bool, Any]:
-    """Validates JSON format, schema, and enum values in one pass."""
+    """
+    Validates the structure and semantic values of extracted CV metadata.
+
+    Ensures that the LLM output can be parsed as JSON and that critical
+    categorical fields (education, experience, and country) contain
+    recognized values.
+
+    Parameters
+    ----------
+    result : TaskOutput
+        The raw output from the CV extraction agent.
+
+    Returns
+    -------
+    tuple[bool, Any]
+        (True, sanitized_json_string) if valid; (False, error_feedback) otherwise.
+    """
     logger.debug(f"Guardrail input:\n{result.raw}")
     # 1. Validate JSON
     try:
@@ -34,11 +58,13 @@ def validate_cvmetadata_schema(result: TaskOutput) -> tuple[bool, Any]:
         fields.append("experience_level")
         errors.append(f"experience_level must be one of {'/'.join(ExperienceLevel)}")
 
-    # 3. Validate country
+    # 3. Validate country (ISO Alpha-2 enforcement)
     if data.get("country"):
         if countries.get(alpha_2=data.get("country")) is None:
             fields.append("country")
-            errors.append(f"`{data.get('country')}` is not valid. Must be a country and in ISO Alpha-2 code")
+            errors.append(
+                f"`{data.get('country')}` is not valid. Must be a country and in ISO Alpha-2 code (e.g., 'US', 'ES')"
+            )
 
     # 4. Return
     if errors:
@@ -49,7 +75,22 @@ def validate_cvmetadata_schema(result: TaskOutput) -> tuple[bool, Any]:
 
 
 def validate_jobmetadata_schema(result: TaskOutput) -> tuple[bool, Any]:
-    """Validates JSON format, schema, and enum values in one pass."""
+    """
+    Validates the structure and semantic values of extracted Job metadata.
+
+    Ensures alignment between the job description analysis and the
+    required data schema for hiring processes.
+
+    Parameters
+    ----------
+    result : TaskOutput
+        The raw output from the Job extraction agent.
+
+    Returns
+    -------
+    tuple[bool, Any]
+        (True, sanitized_json_string) if valid; (False, error_feedback) otherwise.
+    """
     logger.debug(f"Guardrail input:\n{result.raw}")
     # 1. Validate JSON
     try:
@@ -70,11 +111,13 @@ def validate_jobmetadata_schema(result: TaskOutput) -> tuple[bool, Any]:
         fields.append("experience_level")
         errors.append(f"experience_level must be one of {'/'.join(ExperienceLevel)}")
 
-    # 3. Validate country
+    # 3. Validate country (ISO Alpha-2 enforcement)
     if data.get("country"):
         if countries.get(alpha_2=data.get("country")) is None:
             fields.append("country")
-            errors.append("country must be in ISO Alpha-2 code")
+            errors.append(
+                f"`{data.get('country')}` is not valid. Must be a country and in ISO Alpha-2 code (e.g., 'US', 'ES')"
+            )
 
     # 4. Return
     if errors:

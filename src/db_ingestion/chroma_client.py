@@ -1,4 +1,11 @@
-# query_jobs(), init client, etc.
+"""
+ChromaDB Operations Module.
+
+This module provides utility functions to interact with ChromaDB, including
+client initialization, collection management, document ingestion with
+automated metadata extraction, and semantic search with fallback strategies.
+"""
+
 import json
 import os
 import time
@@ -20,7 +27,14 @@ load_dotenv()
 
 def get_client(persist_dir: str = str(CHROMA_DIR)) -> Any:
     """
-    Initialize and return a ChromaDB client with the specified persistence directory.
+    Initialize and return a ChromaDB persistent client.
+
+    Args:
+        persist_dir (str): The directory where ChromaDB data is stored.
+            Defaults to the project's CHROMA_DIR.
+
+    Returns:
+        chromadb.PersistentClient: An instance of the ChromaDB persistent client.
     """
     Path(persist_dir).mkdir(parents=True, exist_ok=True)
     return chromadb.PersistentClient(path=persist_dir)
@@ -28,11 +42,16 @@ def get_client(persist_dir: str = str(CHROMA_DIR)) -> Any:
 
 def get_collection(client: Any, collection_name: str) -> Any:
     """
-    Get or create a jobs collection in the given ChromaDB client.
+    Get an existing collection or create a new one with specific distance metrics.
 
-    - "hnsw:space" → tells Chroma to use Hierarchical Navigable Small World
-                     as distance metric.
-    - "cosine" → instructs HNSW to use cosine distance.
+    Uses Jina AI embeddings and configures the HNSW space for cosine similarity.
+
+    Args:
+        client (Any): The initialized ChromaDB client.
+        collection_name (str): The name of the collection to access or create.
+
+    Returns:
+        chromadb.Collection: The requested ChromaDB collection object.
     """
     embedding_fn = JinaEmbeddingFunction(
         api_key=os.getenv("EMBEDDING_API_KEY"),  # https://jina.ai/
@@ -56,8 +75,21 @@ def add_to_collection(
     **kwargs,
 ) -> None:
     """
-    Add documents with extracted metadata to a ChromaDB collection,
-    optionally respecting a max requests-per-minute limit.
+    Extracts metadata from documents and adds them to the vector collection.
+
+    This function iterates through a DataFrame, uses an AI crew to extract
+    structured metadata from the text content, and performs rate-limited
+    uploads to the database.
+
+    Args:
+        metadata_extractor (Any): The CrewAI-based agent or crew responsible
+            for extracting JSON metadata.
+        corpus (pd.DataFrame): A DataFrame containing at least 'doc_id'
+            and 'content' columns.
+        collection (Any): The ChromaDB collection object to receive the data.
+        max_rpm (int, optional): Maximum Requests Per Minute for the AI extractor.
+        verbose (bool): If True, enables detailed logging for the extraction process.
+        **kwargs: Additional context passed to the metadata extractor.
     """
     # Precompute delay if a limit is provided
     min_delay: float = 60 / max_rpm if max_rpm else 0
@@ -86,6 +118,7 @@ def add_to_collection(
         except Exception as e:
             logger.error(f"Failed extraction for `doc_id={row.get('doc_id')}` due to error: {e}")
             continue
+
         # Remove None values before sending to Chroma
         metadata_dict = {k: v for k, v in metadata.json_dict.items() if v is not None}
         null_keys = [k for k, v in metadata.json_dict.items() if v is None]
@@ -99,29 +132,29 @@ def add_to_collection(
 
 def reshape_chroma_results(chroma_output: dict[str, Any]) -> dict[str, Any]:
     """
-    Output format:
-    {
-    "JOB_ID": {
-        "title": "Official job title",
-        "similarity": 0.85, // Higher is better (range 0 to 1)
-        "skills": "Key technical requirements",
-        "industries": "Relevant market sectors",
-        "experience_level": "Required seniority level",
-        "summary": "Detailed responsibilities and job context",
-        "country": "Job location country",
-    }
-    }
+    Transforms raw ChromaDB query results into a structured dictionary format.
+
+    Converts cosine distance into a similarity score (1 - distance) and
+    maps metadata fields to a consistent schema.
+
+    Args:
+        chroma_output (dict): The raw dictionary returned by `collection.query`.
+
+    Returns:
+        dict[str, dict]: A dictionary where keys are Job IDs and values are
+            formatted metadata and similarity scores.
     """
-    # TODO if chroma_output is empty return empty json
-    # Dictionary comprehension; we take the first index [0]
-    # because you likely queried with a single CV.
+    # Check if results are empty
+    if not chroma_output["ids"] or not chroma_output["ids"][0]:
+        return {}
+
     ids = chroma_output["ids"][0]
     distances = chroma_output["distances"][0]
     metadatas = chroma_output["metadatas"][0]
 
     return {
         ids[i]: {
-            "title": metadatas[i].get("title", ""),  # will be empty in de cvs collection
+            "title": metadatas[i].get("title", ""),
             "similarity": round(1 - distances[i], 4),
             "skills": metadatas[i].get("skills", ""),
             "industries": metadatas[i].get("industries", ""),
@@ -141,7 +174,21 @@ def query_to_collection(
     top_k: int = 3,
 ) -> dict[str, Any]:
     """
-    Retrieves the most relevant documents from ChromaDB with a metadata fallback strategy.
+    Performs a semantic search in a collection with an optional geographical filter.
+
+    Strategy:
+    1. Attempt search filtered by country.
+    2. If no results found or no country provided, perform a global search.
+
+    Args:
+        collection_name (str): The name of the collection to query.
+        query_text (str): The natural language query or document text.
+        country (str): The country name for strict metadata filtering.
+        persist_dir (str): Path to the ChromaDB storage.
+        top_k (int): Number of most relevant documents to return.
+
+    Returns:
+        dict[str, Any]: The reshaped search results including metadata and similarity.
     """
     # Initialize client and access collection
     client = get_client(persist_dir=persist_dir)
@@ -154,7 +201,7 @@ def query_to_collection(
         results = collection.query(query_texts=[query_text], n_results=top_k, where={"country": country})
 
     # Fallback Strategy: If no results found with country filter, widen the search
-    if (country is None) or (results["ids"] == [[]]):
+    if (not country) or (results["ids"] == [[]]):
         logger.warning(
             f"No matches found for country '{country}'. "
             "Broadening search to all regions to ensure candidate visibility."
