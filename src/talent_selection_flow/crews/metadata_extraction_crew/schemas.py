@@ -1,3 +1,11 @@
+"""
+Metadata Extraction Schemas.
+
+This module defines the Pydantic models used to structure extracted information
+from raw text. These schemas act as the blueprint for the MetadataExtractionCrews
+and ensure compatibility with ChromaDB's flat metadata requirements.
+"""
+
 from pydantic import BaseModel
 
 from src.talent_selection_flow.crews.metadata_extraction_crew.enums import (
@@ -9,18 +17,18 @@ from src.talent_selection_flow.crews.metadata_extraction_crew.enums import (
 
 class BaseProfile(BaseModel):
     """
-    Base profile structure shared by both CVs and job postings.
+    Common foundational metadata structure.
 
-    All fields must be strings due to ChromaDB metadata constraints.
-    Multi-value fields (skills, industries...) should be represented as
-    comma-separated strings.
+    This base class forces normalization across different document types.
+    To maintain compatibility with ChromaDB, complex lists (like skills)
+    are flattened into comma-separated strings.
 
-    Fields:
-        skills (str): Comma-separated list of skills.
-        industries (str): Comma-separated list of relevant industries.
-        experience_level (ExperienceLevel): Normalized seniority level.
-        country (str, optional): Candidate's country or job location.
-        summary (str): Short document summary.
+    Attributes:
+        skills (str | None): Flattened list of technical/soft skills.
+        industries (str | None): Relevant sectors (e.g., 'Fintech, Healthcare').
+        experience_level (ExperienceLevel): Enum-validated seniority.
+        country (str | None): Geographic location for regional filtering.
+        summary (str): A concise AI-generated blurb of the document.
     """
 
     skills: str | None = None
@@ -32,11 +40,14 @@ class BaseProfile(BaseModel):
 
 class CVMetadata(BaseProfile):
     """
-    Metadata extracted from candidate CVs.
+    Structured representation of a Candidate's CV.
 
-    Fields:
-        education_level (EducationLevel): Highest education level inferred.
-        languages (str, optional): Comma-separated language list.
+    Extends the base profile with candidate-specific academic and
+    linguistic attributes.
+
+    Attributes:
+        education_level (EducationLevel): Highest degree obtained.
+        languages (str | None): Flattened list of spoken languages.
     """
 
     education_level: EducationLevel
@@ -45,13 +56,16 @@ class CVMetadata(BaseProfile):
 
 class JobMetadata(BaseProfile):
     """
-    Metadata extracted from job postings.
+    Structured representation of a Job Posting.
 
-    Fields:
-        title (str): Job title.
-        city (str, optional): Job location.
-        employment_type (EmploymentType): Full-time, part-time, contract, etc.
-        responsibilities (str, optional): Comma-separated job responsibilities.
+    Extends the base profile with operational details required by
+    hiring managers and recruiters.
+
+    Attributes:
+        title (str): The official name of the position.
+        city (str | None): Specific city location (if applicable).
+        employment_type (EmploymentType): Full-time, Contract, etc.
+        responsibilities (str | None): Flattened list of core job duties.
     """
 
     title: str

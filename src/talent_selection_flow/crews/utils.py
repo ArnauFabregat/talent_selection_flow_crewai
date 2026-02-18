@@ -1,3 +1,12 @@
+"""
+Report Rendering Utility.
+
+This module provides the logic to transform structured analysis data (JSON/Dictionaries)
+into a formatted Markdown report. It supports two main perspectives:
+1. Job Analysis (evaluating multiple CVs for one job).
+2. CV Analysis (evaluating multiple jobs for one candidate).
+"""
+
 from datetime import datetime
 
 from src.talent_selection_flow.crews.classification_crew.enums import DocumentType
@@ -10,6 +19,24 @@ def render_to_markdown(
     gap_analysis_output: dict,
     inverview_questions_output: dict,
 ) -> str:
+    """
+    Generates a comprehensive Recruitment Analysis Report in Markdown format.
+
+    The function dynamically adjusts the report structure based on whether
+    the input was a Job Description or a CV. It iterates through matched
+    documents to append similarity scores, technical gap audits, and
+    generated interview strategies.
+
+    Args:
+        process_type (str): The classification of the input (from DocumentType enum).
+        metadata_dict (dict): Structured metadata of the primary input document.
+        related_docs (dict): A dictionary of matching documents retrieved from ChromaDB.
+        gap_analysis_output (dict): JSON-structured gap analysis from the analysis crew.
+        inverview_questions_output (dict): JSON-structured questions from the analysis crew.
+
+    Returns:
+        str: A complete, newline-joined Markdown string ready for export or display.
+    """
     if process_type == DocumentType.JOB:
         report = [
             "# Recruitment Analysis Report",
