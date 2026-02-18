@@ -11,54 +11,71 @@ Tech Stack:
 
 ## Table of Contents
 
-1. [Data Sources](#data-sources)
-2. [Agents Workflow](#agents-workflow)
-3. [How to Run](#how-to-run)
-4. [Virtual Environment](#virtual-environment)
-    - [Create a new virtualenv with the project's dependencies](#create-a-new-virtualenv-with-the-projects-dependencies)
-    - [Checking if the project's virtual environment is active](#checking-if-the-projects-virtual-environment-is-active)
-    - [Updating the project's dependencies](#updating-the-projects-dependencies)
-5. [Code Quality & Documentation](#code-quality--documentation)
+1. [Agents Workflow](#agents-workflow)
+2. [How to Run](#how-to-run)
+3. [Data Sources](#data-sources)
+4. [Code Quality & Documentation](#code-quality--documentation)
     - [Pre-commit Hooks](#pre-commit-hooks)
     - [Unit Testing](#unit-testing)
     - [Peer Review](#peer-review)
+5. [Virtual Environment](#virtual-environment)
+    - [Create a new virtualenv with the project's dependencies](#create-a-new-virtualenv-with-the-projects-dependencies)
+    - [Checking if the project's virtual environment is active](#checking-if-the-projects-virtual-environment-is-active)
+    - [Updating the project's dependencies](#updating-the-projects-dependencies)
 6. [TODO](#todo)
+
+## Agents Workflow
+
+![Diagram](docs/flow_edited.png)
+
+### Roles Overview
+- 🤖 Professional Document Classifier
+- 🤖 CV Metadata Extractor
+- 🤖 Job Metadata Extractor
+- 🤖 Skill Gap Identifier
+- 🤖 Interview Question Generator
+
+## How to Run
+TBD
 
 ## Data Sources
 The system uses two primary datasets sourced from Kaggle to train and evaluate the CV-to-job matching algorithms:
 - CV data: https://www.kaggle.com/datasets/snehaanbhawal/resume-dataset
 - Job posts data: https://www.kaggle.com/datasets/shivamb/real-or-fake-fake-jobposting-prediction
 
-## Agents Workflow
+## Code Quality & Documentation
+### Pre-commit Hooks
+---
+This project uses [pre-commit](https://pre-commit.com/) hooks to enforce code quality standards automatically before each commit. The following hooks are configured:
 
-![Diagram](docs/flow_edited.png)
+- **Formatting & File Integrity**: `trailing-whitespace`, `end-of-file-fixer`, `check-yaml`, `check-toml`
+- **Code Linting & Formatting**: `ruff-check`, `ruff-format`
+- **Type Checking**: `mypy`
 
-The system will do three main workflows:
-- Metadata extraction from raw cv or job
-- CV → Related Jobs → Gaps → Interview Questions → Final Report
-- Job → Related CVs → Gaps → Interview Questions → Final Report
+Pre-commit hooks are automatically installed during virtual environment setup (`uv sync`). To run them manually:
+```bash
+.venv\Scripts\activate
+pre-commit run
+```
 
-Agents description:
-0) Metadata extractor Agents: cvs and jobs.
-1) Orchestrator Agent.
-    - **Role**: Entry point. Detects whether the user uploaded a CV or a job description and selects the correct workflow.
-    - **Tools**: None or simple classification LLM.
-    - **Goal**: Pick the correct pipeline (CV→JD or JD→CV).
-2) Gap Identifier Agent.
-    - **Role**:
-        - Compare candidate skills vs job requirements.
-        - Identify missing skills (skill gaps).
-        - Provide severity levels (must‑have / nice‑to‑have).
-    - **Goal**: Output a structured JSON of gaps.
-3) Interview Question Generator Agent.
-    - **Role**: Generate HR-friendly interview questions based on:
-        - Skills matched
-        - Skills missing
-        - Ambiguities in experience
-        - Seniority expectations
-    - **Goal**: Provide 5–10 tailored questions per match.
+### Unit Testing
+---
+Unit tests ensure code reliability and prevent regressions. Tests are written using pytest and should cover critical functionality.
 
-## How to Run
+To run all tests:
+```bash
+uv run pytest
+```
+
+To run tests with coverage:
+```bash
+uv run pytest --cov
+```
+
+### Peer Review
+---
+All code contributions are subject to peer review. Detailed review guidelines and standards are documented in the project's peer review guidelines document.
+
 TBD
 
 ## Virtual Environment
@@ -116,41 +133,6 @@ This command will update the project's files `pyproject.toml` and `uv.lock` auto
 ---
 Open a terminal in VSCode and execute the following command:
 * `uv sync`
-
-## Code Quality & Documentation
-### Pre-commit Hooks
----
-This project uses [pre-commit](https://pre-commit.com/) hooks to enforce code quality standards automatically before each commit. The following hooks are configured:
-
-- **Formatting & File Integrity**: `trailing-whitespace`, `end-of-file-fixer`, `check-yaml`, `check-toml`
-- **Code Linting & Formatting**: `ruff-check`, `ruff-format`
-- **Type Checking**: `mypy`
-
-Pre-commit hooks are automatically installed during virtual environment setup (`uv sync`). To run them manually:
-```bash
-.venv\Scripts\activate
-pre-commit run
-```
-
-### Unit Testing
----
-Unit tests ensure code reliability and prevent regressions. Tests are written using pytest and should cover critical functionality.
-
-To run all tests:
-```bash
-uv run pytest
-```
-
-To run tests with coverage:
-```bash
-uv run pytest --cov
-```
-
-### Peer Review
----
-All code contributions are subject to peer review. Detailed review guidelines and standards are documented in the project's peer review guidelines document.
-
-TBD
 
 ## TODO
 - Add top_k from input optional
