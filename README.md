@@ -55,10 +55,10 @@ job_example = """
 # JOB POSTING: Senior Backend Engineer (AI Systems)
 
 ## POSITION OVERVIEW
-We are seeking a Senior Backend Engineer to join our AI Orchestration team. 
+We are seeking a Senior Backend Engineer to join our AI Orchestration team.
 The ...
 ...
-... 
+...
 """
 response = await TalentSelectionFlow(verbose=False).kickoff_async(
     inputs={"raw_input": job_example}
@@ -93,11 +93,15 @@ This project uses [pre-commit](https://pre-commit.com/) hooks to enforce code qu
 - **Code Linting & Formatting**: `ruff-check`, `ruff-format`
 - **Type Checking**: `mypy`
 
-Pre-commit hooks are automatically installed during virtual environment setup (`uv sync`). To run them manually:
-```bash
-.venv\Scripts\activate
-pre-commit run
-```
+Pre-commit hooks are automatically installed during virtual environment setup (`uv sync`).
+- To run them for modified (staged) files:
+    ```bash
+    uv run pre-commit run
+    ```
+- To run them for the entire repository:
+    ```bash
+    uv run pre-commit run --all-files
+    ```
 
 ### Unit Testing
 ---
@@ -177,7 +181,6 @@ Open a terminal in VSCode and execute the following command:
 
 ## TODO
 - Add top_k from input optional
-- Add docstrings
 - Add unit tests
 - Add max_iter and max_rpm to control rate limits in agents
 - Add agent that gets profiles from linkedin in JobToCVCrew
@@ -188,4 +191,3 @@ Open a terminal in VSCode and execute the following command:
     - langchain: https://docs.langchain.com/oss/python/integrations/tools
 
 - Crewai examples: https://docs.crewai.com/en/examples/example
-

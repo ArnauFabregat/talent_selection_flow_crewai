@@ -5,6 +5,6 @@ parser_agent:
   goal: >
     Categorize the provided text into exactly one of three categories: {output_options}.
   backstory: >
-    You are an expert at identifying document types. 
+    You are an expert at identifying document types.
     You only output the chosen label from the provided list.
     You provide objective, single-word classifications without preamble.

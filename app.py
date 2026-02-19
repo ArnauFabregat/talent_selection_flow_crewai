@@ -1,27 +1,48 @@
-from typing import Any, List
+"""
+Talent Selection AI Assistant Module.
+
+This module provides a Chainlit-based interface for evaluating job candidates.
+It supports PDF uploads or text pasting, orchestrates multi-agent flows using
+the TalentSelectionFlow and HRConsultingCrew, and maintains a conversation
+history for follow-up Q&A.
+"""
+
+from typing import Any
+
 import chainlit as cl
 import pymupdf4llm
 
-from src.talent_selection_flow.flow import TalentSelectionFlow
 from src.talent_selection_flow.crews.hr_consultant_crew.crew import HRConsultingCrew
+from src.talent_selection_flow.flow import TalentSelectionFlow
 
 
-def get_actions() -> List[Any]:
+def get_actions() -> list[Any]:
+    """
+    Generates the standard persistent action buttons for the chat interface.
+
+    Returns:
+        list[cl.Action]: A list of Chainlit Action objects for restarting or downloading.
+    """
     return [
-        cl.Action(name="restart_flow", value="restart", label="🔄 Start New Evaluation", payload={}),
-        cl.Action(name="download_report_txt", value="download", label="📥 Download Recruitment Analysis Report",
-                  payload={})
+        cl.Action(name="restart_flow", label="🔄 Start New Evaluation", payload={}),
+        cl.Action(name="download_report_txt", label="📥 Download Recruitment Analysis Report", payload={}),
     ]
 
 
 # --- CORE WORKFLOW LOGIC ---
 async def run_talent_flow() -> None:
-    """The main process for uploading and evaluating a candidate"""
+    """
+    Orchestrates the primary talent evaluation workflow.
+
+    This function handles the initial user interaction (choosing input mode),
+    processes the input (PDF or Text), triggers the multi-agent selection flow,
+    and stores results in the user session.
+    """
 
     # Selection: PDF or Text
     actions = [
-        cl.Action(name="pdf_mode", value="pdf", label="📄 Upload PDF", payload={}),
-        cl.Action(name="text_mode", value="text", label="✍️ Paste Text", payload={})
+        cl.Action(name="pdf_mode", label="📄 Upload PDF", payload={}),
+        cl.Action(name="text_mode", label="✍️ Paste Text", payload={}),
     ]
 
     choice = await cl.AskActionMessage(
@@ -42,7 +63,7 @@ async def run_talent_flow() -> None:
     else:
         res = await cl.AskUserMessage(content="Please paste the resume text here:").send()
         file_name = "Pasted Text Input"
-        input_doc = res['output']
+        input_doc = res["output"]
 
     # Visual Orchestration
     async with cl.Step(name="Talent Selection Flow", type="run") as step:
@@ -58,30 +79,41 @@ async def run_talent_flow() -> None:
     cl.user_session.set("evaluation_report", result)
 
     # Final result with Restart Action
-    context_note = "\n\n*> 💡 Context: I'm currently tracking the last 6 messages " \
-                   "to stay focused on our immediate conversation.*"
+    context_note = (
+        "\n\n*> 💡 Context: I'm currently tracking the last 6 messages to stay focused on our immediate conversation.*"
+    )
     await cl.Message(
         content=f"### ✅ Evaluation Result\n\n{result}\n\n---\n💬 **You can now ask follow-up questions "
-                f"about this candidate, or click the button above to reset.**{context_note}",
+        f"about this candidate, or click the button above to reset.**{context_note}",
         actions=get_actions(),
     ).send()
 
 
 # --- EVENT HANDLERS ---
 
+
 @cl.on_chat_start
 async def start() -> None:
-    """Initial greeting and start of the flow"""
+    """
+    Handles the initialization of the chat session.
+
+    Sends a welcome message and triggers the primary talent evaluation flow.
+    """
     await cl.Message(
         content="👋 **Welcome to the Talent Scout Assistant.**\nI'll help you analyze candidates using "
-                "Multi-Agent intelligence."
+        "Multi-Agent intelligence."
     ).send()
     await run_talent_flow()
 
 
 @cl.action_callback("restart_flow")
 async def on_restart(action: cl.Action) -> None:
-    """Guide the user to the only 100% reliable reset method"""
+    """
+    Callback triggered when the user clicks the 'restart_flow' action.
+
+    Args:
+        action (cl.Action): The action object instance that triggered the callback.
+    """
 
     # 1. Visual feedback that the request was heard
     await cl.Message(
@@ -99,7 +131,15 @@ async def on_restart(action: cl.Action) -> None:
 
 @cl.on_message
 async def handle_chat(message: cl.Message) -> None:
-    """Interactive Q&A loop: Triggered whenever the user types a message"""
+    """
+    Handles follow-up messages from the user using a conversational HR agent.
+
+    Maintains context by passing the original report and a sliding window of
+    chat history to the HRConsultingCrew.
+
+    Args:
+        message (cl.Message): The message object containing the user's text.
+    """
     # 1. Configuration
     MAX_HISTORY_MESSAGES = 6  # Keeps the last 3 user/assistant pairs
 
@@ -111,18 +151,19 @@ async def handle_chat(message: cl.Message) -> None:
         return
 
     # 2. Format the sliding window context
-    # We slice the history to take only the last N items
     recent_history = history[-MAX_HISTORY_MESSAGES:]
     context_summary = "\n".join(recent_history)
 
     async with cl.Step(name="HR Consultant Flow", type="llm") as step:
         step.input = "⚙️ Orchestrating agents for evaluation..."
         crew = HRConsultingCrew(verbose=True)
-        res = await cl.make_async(crew.crew().kickoff)(inputs={
-            "report": report,
-            "context_summary": context_summary,
-            "message": message.content,
-        })
+        res = await cl.make_async(crew.crew().kickoff)(
+            inputs={
+                "report": report,
+                "context_summary": context_summary,
+                "message": message.content,
+            }
+        )
 
         # 3. Update history: Add current turn and save back to session
         history.append(f"User: {message.content}")
@@ -134,6 +175,15 @@ async def handle_chat(message: cl.Message) -> None:
 
 @cl.action_callback("download_report_txt")
 async def on_download_txt(action: cl.Action) -> None:
+    """
+    Callback triggered when the user clicks the 'download_report_txt' action.
+
+    Retrieves the report from the session and provides it as a downloadable
+    text file in the chat UI.
+
+    Args:
+        action (cl.Action): The action object instance that triggered the callback.
+    """
     # 1. Retrieve the report from the user session
     report_text = cl.user_session.get("evaluation_report")
 
@@ -143,13 +193,8 @@ async def on_download_txt(action: cl.Action) -> None:
 
     # 2. Create the file element (using binary encoding)
     file_element = cl.File(
-        content=report_text.encode("utf-8"),
-        name="recruitment_analysis_report.txt",
-        display="inline"
+        content=report_text.encode("utf-8"), name="recruitment_analysis_report.txt", display="inline"
     )
 
     # 3. Send the file to the UI
-    await cl.Message(
-        content="💾 **Your report is ready for download:**",
-        elements=[file_element]
-    ).send()
+    await cl.Message(content="💾 **Your report is ready for download:**", elements=[file_element]).send()
