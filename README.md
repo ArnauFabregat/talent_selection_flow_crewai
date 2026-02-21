@@ -181,6 +181,7 @@ Open a terminal in VSCode and execute the following command:
 
 ## TODO
 - Add reranker transformer after vector db retrieval to enhance similarity scoring.
+- Optimize the user prompt template for task expected_output
 - Add top_k from input optional
 - Add unit tests
 - Add max_iter and max_rpm to control rate limits in agents
@@ -192,3 +193,4 @@ Open a terminal in VSCode and execute the following command:
     - langchain: https://docs.langchain.com/oss/python/integrations/tools
 
 - Crewai examples: https://docs.crewai.com/en/examples/example
+
