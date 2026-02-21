@@ -180,6 +180,7 @@ Open a terminal in VSCode and execute the following command:
 * `uv sync`
 
 ## TODO
+- Add reranker transformer after vector db retrieval to enhance similarity scoring.
 - Add top_k from input optional
 - Add unit tests
 - Add max_iter and max_rpm to control rate limits in agents
